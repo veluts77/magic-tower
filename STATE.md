@@ -1,10 +1,10 @@
 # Project State
 
-Last updated: initial handoff package created.
+Last updated: after TASK-001.
 
 ## Completed
 
-None.
+- TASK-001-bootstrap-project.md
 
 ## In Progress
 
@@ -12,7 +12,7 @@ None.
 
 ## Next Task
 
-- `tasks/TASK-001-bootstrap-project.md`
+- WAITING_FOR_TASK-002
 
 ## Known Blockers
 
@@ -20,5 +20,4 @@ None.
 
 ## Notes
 
-Проект находится на этапе создания технического фундамента.
-Следующий шаг — выполнить `TASK-001`.
+Базовый Gradle-проект с libGDX создан и собирается.
