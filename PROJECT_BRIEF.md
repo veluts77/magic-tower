@@ -72,17 +72,32 @@ Meditative adventure / puzzle exploration game.
 - Build tool: Gradle
 - Target platform: Desktop only
 - Data format: JSON
-- Architecture style: simple data-driven architecture
-- No Android, no iOS, no WebGL for now.
+- Architecture: three-module layered architecture
+
+### Modules
+
+```text
+domain   → чистая игровая логика, ноль зависимостей
+engine   → интеграция с libGDX (рендеринг, ввод, загрузка данных)
+desktop  → десктопный запускатор
+```
+
+### Dependency direction
+
+```text
+desktop → engine → domain
+                  → libGDX
+```
 
 ## Current Goal
 
 Создать технический фундамент проекта:
 
 1. проект собирается через Gradle;
-2. запускается пустое окно приложения;
-3. структура проекта готова к будущему добавлению игровых экранов;
-4. есть документация для следующих задач.
+2. структура разделена на модули `domain`, `engine`, `desktop`;
+3. доменная логика не зависит от libGDX;
+4. запускается десктопное окно;
+5. есть документация для следующих задач.
 
 ## Non-Goals
 

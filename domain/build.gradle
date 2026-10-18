@@ -8,6 +8,5 @@ java {
     }
 }
 
-dependencies {
-    api "com.badlogicgames.gdx:gdx:$gdxVersion"
-}
+// No external dependencies.
+// This module uses only Java stdlib.

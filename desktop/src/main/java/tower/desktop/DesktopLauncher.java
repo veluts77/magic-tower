@@ -2,7 +2,7 @@ package tower.desktop;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import tower.core.TowerGame;
+import tower.engine.TowerGame;
 
 public class DesktopLauncher {
 

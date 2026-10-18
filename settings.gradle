@@ -1,4 +1,5 @@
 rootProject.name = 'tower-game'
 
-include 'core'
+include 'domain'
+include 'engine'
 include 'desktop'

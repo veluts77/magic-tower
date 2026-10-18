@@ -6,6 +6,7 @@
 
 Основные принципы:
 
+- доменная логика полностью отделена от фреймворка;
 - данные отделены от кода;
 - игровая логика отделена от рендеринга;
 - действия отделены от способа их отображения;
@@ -17,83 +18,148 @@
 
 ## Gradle Modules
 
-Проект состоит из двух Gradle-модулей:
+Проект состоит из трёх Gradle-модулей:
 
-### `core`
+### `domain`
 
-Содержит игровую логику и общие классы.
+Чистая игровая логика. **Ноль внешних зависимостей.**
 
-Не содержит платформенный код запуска.
+Содержит:
+
+- модели данных (этажи, комнаты, заклинания, духи, артефакты);
+- состояние игры;
+- игровую логику (прогрессия, доступные действия, загадки);
+- DTO-классы для загрузки данных;
+- интерфейсы для внешних сервисов (загрузка данных, сохранение).
+
+Не содержит:
+
+- никаких ссылок на libGDX;
+- рендеринга;
+- работы с файловой системой напрямую;
+- обработки ввода.
+
+### `engine`
+
+Интеграция с libGDX. Зависит от `domain` и от `libGDX`.
+
+Содержит:
+
+- рендеринг (спрайты, фоны, камера);
+- экраны (реализации libGDX Screen);
+- обработку ввода и трансляцию в доменные действия;
+- загрузку данных из файлов (реализация доменных интерфейсов);
+- сохранение прогресса;
+- главный класс игры, наследующий `com.badlogic.gdx.Game`.
+
+Не содержит:
+
+- игровой логики (правил, условий, прогрессии);
+- определения того, какие действия доступны.
 
 ### `desktop`
 
-Содержит десктопный запускатор на LWJGL3.
+Десктопный запускатор. Зависит от `engine`.
+
+Содержит:
+
+- `DesktopLauncher` с конфигурацией окна;
+- платформенные настройки.
 
 ---
 
-## Recommended Package Structure
-
-В будущем рекомендуется такая структура пакетов:
+## Dependency Graph
 
 ```text
-tower.core
-├── TowerGame.java
-├── screen
-├── data
-├── world
-├── action
-├── spell
-├── spirit
-└── util
+desktop
+  └── engine
+        ├── domain   (чистая Java, ноль зависимостей)
+        └── libGDX   (gdx)
 ```
 
-### `tower.core`
+В терминах Gradle:
 
-Главный класс игры.
+```text
+desktop  → implementation project(':engine')
+engine   → api project(':domain')
+engine   → implementation gdx
+desktop  → implementation gdx-backend-lwjgl3
+desktop  → runtimeOnly gdx-platform natives-desktop
+domain   → (ничего)
+```
 
-### `tower.core.screen`
+---
 
-Экраны игры:
+## Package Structure
 
-- boot screen;
-- room screen;
-- future menu screens.
+### Модуль `domain`
 
-### `tower.core.data`
+```text
+tower.domain
+├── model/
+│   ├── FloorId.java
+│   ├── RoomId.java
+│   ├── ObjectId.java
+│   ├── SpellId.java
+│   ├── SpiritId.java
+│   ├── ArtifactId.java
+│   └── MasteryMarkId.java
+├── state/
+│   ├── GameState.java
+│   ├── FloorState.java
+│   ├── PlayerState.java
+│   └── RoomState.java
+├── logic/
+│   ├── FloorProgression.java
+│   ├── ActionResolver.java
+│   ├── ActionExecutor.java
+│   └── PuzzleChecker.java
+├── action/
+│   ├── GameAction.java
+│   ├── ActionType.java
+│   ├── ActionContext.java
+│   └── ActionResult.java
+├── data/
+│   ├── FloorDefinition.java
+│   ├── RoomDefinition.java
+│   ├── ObjectDefinition.java
+│   ├── SpellDefinition.java
+│   └── SpiritDefinition.java
+└── service/
+    ├── DataLoader.java
+    ├── SaveService.java
+    └── RandomProvider.java
+```
 
-DTO-классы и загрузчики данных:
+На ранних этапах не все классы будут существовать.
+Структура приведена как целевая, классы создаются по мере необходимости.
 
-- floor data;
-- room data;
-- spell data;
-- action data.
+### Модуль `engine`
 
-### `tower.core.world`
+```text
+tower.engine
+├── TowerGame.java
+├── render/
+│   ├── RoomRenderer.java
+│   └── SpriteManager.java
+├── screen/
+│   ├── GameScreen.java
+│   └── BootScreen.java
+├── input/
+│   ├── InputHandler.java
+│   └── ActionMapper.java
+├── data/
+│   └── JsonDataLoader.java
+└── save/
+    └── GdxSaveService.java
+```
 
-Игровое состояние:
+### Модуль `desktop`
 
-- текущий этаж;
-- текущая комната;
-- известные заклинания;
-- артефакты;
-- флаги;
-- mastery marks.
-
-### `tower.core.action`
-
-Система действий:
-
-- доступные действия;
-- условия доступности;
-- выполнение действий.
-
-### `tower.core.spell`
-
-Модель заклинаний.
-
-### `tower.core.spirit`
-
-Модель духов.
+```text
+tower.desktop
+└── DesktopLauncher.java
+```
 
 ---
 
@@ -122,7 +188,8 @@ assets/
     └── actions/
 ```
 
-На этапе `TASK-001` данные ещё не добавляются.
+Парсинг JSON происходит в модуле `engine`.
+Модуль `domain` определяет только структуру DTO-классов.
 
 ---
 
@@ -141,7 +208,7 @@ assets/
 - `masteryMarks`
 - `seed`, если понадобится лёгкая рандомизация
 
-На этапе начальной задачи состояние не реализуется.
+Все эти поля живут в модуле `domain`.
 
 ---
 
@@ -150,18 +217,20 @@ assets/
 Будущая система действий должна работать так:
 
 1. Игрок выбирает объект или комнату.
-2. Игра собирает контекст.
-3. Игра определяет список доступных действий.
-4. UI отображает эти действия.
-5. Игрок выбирает действие.
-6. Действие выполняется.
-7. Состояние мира меняется.
-8. Список действий может измениться.
+2. Модуль `engine` определяет, какой объект выбран.
+3. Модуль `engine` запрашивает у `domain` список доступных действий.
+4. Модуль `domain` анализирует состояние и возвращает список.
+5. Модуль `engine` отображает действия через UI.
+6. Игрок выбирает действие.
+7. Модуль `engine` передаёт действие в `domain`.
+8. Модуль `domain` выполняет действие и возвращает результат.
+9. Модуль `engine` отображает результат.
 
 Важно:
 
-- UI не должен сам решать, что можно сделать;
-- игровая логика не должна зависеть от конкретного вида меню.
+- `domain` не знает, как отображаются действия;
+- `engine` не решает, какие действия доступны;
+- `engine` не содержит игровых правил.
 
 ---
 
@@ -183,13 +252,40 @@ assets/
 
 ---
 
+## Domain Module Rules
+
+Модуль `domain`:
+
+- использует только `java.*` и `javax.*`;
+- не использует `com.badlogicgames.*`;
+- не использует `Gdx.*`;
+- для логирования использует `java.util.logging`;
+- DTO-классы имеют публичные поля или стандартные геттеры/сеттеры;
+- не содержит статических mutable состояний.
+
+---
+
+## Engine Module Rules
+
+Модуль `engine`:
+
+- может использовать `com.badlogicgames.gdx.*`;
+- получает данные из `domain` и передаёт их в рендеринг;
+- реализует интерфейсы из `domain.service`;
+- не содержит игровых правил и условий;
+- не определяет, какие действия доступны.
+
+---
+
 ## Dependencies Policy
 
 Разрешено:
 
-- `com.badlogicgames.gdx:gdx`
-- `com.badlogicgames.gdx:gdx-backend-lwjgl3`
-- `com.badlogicgames.gdx:gdx-platform` с `natives-desktop`
+- `com.badlogicgames.gdx:gdx` (в `engine`)
+- `com.badlogicgames.gdx:gdx-backend-lwjgl3` (в `desktop`)
+- `com.badlogicgames.gdx:gdx-platform` с `natives-desktop` (в `desktop`)
+
+Модуль `domain` не имеет внешних зависимостей.
 
 Не добавлять без необходимости:
 

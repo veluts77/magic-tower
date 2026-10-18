@@ -4,18 +4,33 @@
 
 Цель: проект существует и собирается.
 
+Статус: **выполнено**.
+
+Выполненные задачи:
+
+- создан Gradle-проект;
+- настроена Java 21;
+- подключён libGDX;
+- создан минимальный запуск окна.
+
+---
+
+## Milestone 0.5 — Module Restructuring
+
+Цель: разделить проект на три модуля с чистой архитектурой.
+
 Задачи:
 
-- создать Gradle-проект;
-- настроить Java 21;
-- подключить libGDX;
-- создать модули `core` и `desktop`;
-- сделать минимальный запуск окна;
-- подготовить структуру папок.
+- создать модуль `domain` (чистая Java, ноль зависимостей);
+- создать модуль `engine` (зависит от `domain` + libGDX);
+- обновить модуль `desktop` (зависит от `engine`);
+- удалить модуль `core`;
+- перенести существующий код в соответствующие модули;
+- убедиться, что проект собирается и запускается.
 
 Текущая задача:
 
-- `tasks/TASK-001-bootstrap-project.md`
+- `tasks/TASK-002-restructure-modules.md`
 
 ---
 
@@ -25,7 +40,7 @@
 
 Возможные будущие задачи:
 
-- простой `Screen` abstraction;
+- простой `Screen` abstraction в `engine`;
 - загрузка базовых ресурсов;
 - работа с `assets` folder;
 - логирование;
@@ -40,8 +55,9 @@
 Будущие элементы:
 
 - `assets/data/` folder;
-- simple DTO classes;
-- loader for floors / rooms / spells;
+- DTO classes в `domain.data`;
+- `DataLoader` interface в `domain.service`;
+- `JsonDataLoader` implementation в `engine.data`;
 - validation of missing files.
 
 ---
@@ -52,6 +68,7 @@
 
 Будущие элементы:
 
+- `RoomRenderer` в `engine.render`;
 - placeholder background;
 - object hotspots;
 - simple selection;
@@ -65,10 +82,10 @@
 
 Будущие элементы:
 
-- `GameAction`;
+- `GameAction`, `ActionResolver`, `ActionExecutor` в `domain`;
 - available actions provider;
 - action execution;
-- simple placeholder UI.
+- simple placeholder UI в `engine`.
 
 ---
 
@@ -94,6 +111,8 @@
 
 Будущие элементы:
 
+- `SaveService` interface в `domain`;
+- `GdxSaveService` implementation в `engine`;
 - local save file;
 - floor completion state;
 - known spells and spirits;

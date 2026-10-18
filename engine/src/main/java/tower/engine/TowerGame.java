@@ -1,4 +1,4 @@
-package tower.core;
+package tower.engine;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
