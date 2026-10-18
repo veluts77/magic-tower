@@ -1,0 +1,44 @@
+{
+  "id": "ground",
+  "displayName": "Ground Floor",
+  "rooms": [
+    {
+      "id": "entrance",
+      "displayName": "Entrance",
+      "objects": [
+        {
+          "id": "arch",
+          "displayName": "Stone Arch",
+          "type": "passage"
+        }
+      ]
+    },
+    {
+      "id": "hall",
+      "displayName": "Quiet Hall",
+      "objects": [
+        {
+          "id": "brazier",
+          "displayName": "Cold Brazier",
+          "type": "fixture"
+        },
+        {
+          "id": "inscription",
+          "displayName": "Faded Inscription",
+          "type": "clue"
+        }
+      ]
+    },
+    {
+      "id": "alcove",
+      "displayName": "Side Alcove",
+      "objects": [
+        {
+          "id": "pedestal",
+          "displayName": "Empty Pedestal",
+          "type": "fixture"
+        }
+      ]
+    }
+  ]
+}

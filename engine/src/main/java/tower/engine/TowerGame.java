@@ -4,12 +4,18 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
+import tower.domain.data.FloorDefinition;
+import tower.domain.service.DataLoader;
+import tower.engine.data.JsonDataLoader;
 
 public class TowerGame extends Game {
 
     @Override
     public void create() {
-        // Game initialization will be added later.
+        DataLoader loader = new JsonDataLoader();
+        FloorDefinition floor = loader.loadFloor("ground");
+        int roomCount = floor.roomIds == null ? 0 : floor.roomIds.size();
+        Gdx.app.log("TowerGame", "Loaded floor: " + floor.displayName + ", rooms: " + roomCount);
     }
 
     @Override
