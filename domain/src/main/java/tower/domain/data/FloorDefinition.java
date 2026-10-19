@@ -8,4 +8,8 @@ public class FloorDefinition {
     public String id;
     public String displayName;
     public List<String> roomIds = new ArrayList<>();
+
+    public int roomCount() {
+        return roomIds == null ? 0 : roomIds.size();
+    }
 }

@@ -13,6 +13,16 @@ import java.util.List;
 
 public class JsonDataLoader implements DataLoader {
 
+    private List<RoomDefinition> loadedRooms = List.of();
+
+    public RoomDefinition firstLoadedRoom() {
+        if (loadedRooms.isEmpty()) {
+            Gdx.app.error("JsonDataLoader", "Loaded floor has no rooms");
+            throw new IllegalStateException("Loaded floor has no rooms");
+        }
+        return loadedRooms.get(0);
+    }
+
     @Override
     public FloorDefinition loadFloor(String floorId) {
         FileHandle file = Gdx.files.internal("data/floors/" + floorId + ".json");
@@ -26,21 +36,30 @@ public class JsonDataLoader implements DataLoader {
         json.setElementType(RoomDefinition.class, "objects", ObjectDefinition.class);
 
         FloorFile fileData = json.fromJson(FloorFile.class, file);
-        FloorDefinition floor = new FloorDefinition();
-        floor.id = fileData.id;
-        floor.displayName = fileData.displayName;
-        floor.roomIds = new ArrayList<>();
         if (fileData.rooms != null) {
-            for (RoomDefinition room : fileData.rooms) {
-                floor.roomIds.add(room.id);
-            }
+            loadedRooms = new ArrayList<>(fileData.rooms);
+        } else {
+            loadedRooms = List.of();
         }
-        return floor;
+        return fileData.createFloorDefinition();
     }
 
     static class FloorFile {
         public String id;
         public String displayName;
         public List<RoomDefinition> rooms = new ArrayList<>();
+
+        FloorDefinition createFloorDefinition() {
+            FloorDefinition floor = new FloorDefinition();
+            floor.id = id;
+            floor.displayName = displayName;
+            floor.roomIds = new ArrayList<>();
+            if (rooms != null) {
+                for (RoomDefinition room : rooms) {
+                    floor.roomIds.add(room.id);
+                }
+            }
+            return floor;
+        }
     }
 }
