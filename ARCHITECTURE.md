@@ -22,7 +22,7 @@
 
 ### `domain`
 
-Чистая игровая логика. **Ноль внешних зависимостей.**
+Чистая игровая логика. **Ноль runtime-зависимостей.** Допустимы test-scope зависимости (JUnit 5).
 
 Содержит:
 
@@ -73,7 +73,7 @@
 ```text
 desktop
   └── engine
-        ├── domain   (чистая Java, ноль зависимостей)
+        ├── domain (чистая Java, ноль runtime-зависимостей; тесты — JUnit 5)
         └── libGDX   (gdx)
 ```
 
@@ -256,7 +256,7 @@ assets/
 
 Модуль `domain`:
 
-- использует только `java.*` и `javax.*`;
+- в main-коде использует только `java.*` и `javax.*`; тестовый код может использовать JUnit 5;
 - не использует `com.badlogicgames.*`;
 - не использует `Gdx.*`;
 - для логирования использует `java.util.logging`;
@@ -285,7 +285,8 @@ assets/
 - `com.badlogicgames.gdx:gdx-backend-lwjgl3` (в `desktop`)
 - `com.badlogicgames.gdx:gdx-platform` с `natives-desktop` (в `desktop`)
 
-Модуль `domain` не имеет внешних зависимостей.
+Модуль `domain` не имеет внешних runtime-зависимостей. Разрешены зависимости только в области `testImplementation`,
+в первую очередь JUnit 5 для юнит-тестов. Никаких других новых зависимостей без обоснования.
 
 Не добавлять без необходимости:
 

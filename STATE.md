@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: after TASK-004.
+Last updated: after TASK-005.
 
 ## Completed
 
@@ -8,6 +8,7 @@ Last updated: after TASK-004.
 - TASK-002-restructure-modules.md
 - TASK-003-data-loading.md
 - TASK-004-screen-and-room-view.md
+- TASK-005-domain-state-and-actions.md
 
 ## In Progress
 
@@ -15,7 +16,8 @@ None.
 
 ## Next Task
 
-- WAITING_FOR_TASK-005
+- Подключить команды и навигацию к игровому экрану.
+  Модель действий уже готова в `domain` (осмотр и переходы), но ещё не выставлена в интерфейсе.
 
 ## Known Blockers
 
@@ -23,4 +25,5 @@ None.
 
 ## Notes
 
-Игровой экран показывает первую комнату этажа программными заглушками.
+Игровой экран по-прежнему показывает первую комнату этажа программными заглушками.
+Состояние игры, доступные действия и переходы между комнатами живут в `domain` и покрыты юнит-тестами.

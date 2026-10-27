@@ -8,5 +8,10 @@ java {
     }
 }
 
-// No external dependencies.
-// This module uses only Java stdlib.
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

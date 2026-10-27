@@ -5,6 +5,13 @@
     {
       "id": "entrance",
       "displayName": "Entrance",
+      "description": "A worn stone arch leads into the tower. Dust hangs in the still air.",
+      "exits": [
+        {
+          "targetRoomId": "hall",
+          "label": "Go to the Quiet Hall"
+        }
+      ],
       "objects": [
         {
           "id": "arch",
@@ -16,6 +23,17 @@
     {
       "id": "hall",
       "displayName": "Quiet Hall",
+      "description": "A long hall is quiet. A cold brazier and a faded inscription wait in the dim light.",
+      "exits": [
+        {
+          "targetRoomId": "entrance",
+          "label": "Go to the Entrance"
+        },
+        {
+          "targetRoomId": "alcove",
+          "label": "Go to the Side Alcove"
+        }
+      ],
       "objects": [
         {
           "id": "brazier",
@@ -32,6 +50,13 @@
     {
       "id": "alcove",
       "displayName": "Side Alcove",
+      "description": "A narrow alcove holds an empty pedestal. The passage back is the only way out.",
+      "exits": [
+        {
+          "targetRoomId": "hall",
+          "label": "Go to the Quiet Hall"
+        }
+      ],
       "objects": [
         {
           "id": "pedestal",
