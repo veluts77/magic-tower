@@ -3,6 +3,7 @@ package tower.engine;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import tower.domain.data.FloorDefinition;
+import tower.domain.state.GameState;
 import tower.engine.data.JsonDataLoader;
 import tower.engine.screen.GameScreen;
 
@@ -17,7 +18,7 @@ public class TowerGame extends Game {
         Gdx.app.log(
                 "TowerGame",
                 "Loaded floor: " + floor.displayName() + ", rooms: " + floor.roomCount());
-        setScreen(new GameScreen(loader.firstLoadedRoom()));
+        setScreen(new GameScreen(GameState.start(floor), loader.loadedRooms()));
     }
 
     @Override

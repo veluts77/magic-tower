@@ -24,11 +24,11 @@ public class RoomRenderer {
     private final GlyphLayout layout = new GlyphLayout();
 
     public void draw(RoomDefinition room, ShapeRenderer shapes, SpriteBatch batch, BitmapFont font,
-                     float screenWidth, float screenHeight) {
+                     float screenWidth, float screenHeight, float bottomInset) {
         float roomX = 48f;
-        float roomY = 56f;
+        float roomY = 56f + bottomInset;
         float roomWidth = screenWidth - 96f;
-        float roomHeight = screenHeight - 128f;
+        float roomHeight = screenHeight - 128f - bottomInset;
 
         shapes.begin(Filled);
         shapes.setColor(ROOM_COLOR);
