@@ -50,15 +50,14 @@ public class JsonDataLoader implements DataLoader {
         public List<RoomDefinition> rooms = new ArrayList<>();
 
         FloorDefinition createFloorDefinition() {
-            var floor = new FloorDefinition();
-            floor.id = id;
-            floor.displayName = displayName;
-            floor.roomIds = new ArrayList<>();
+            var floor = FloorDefinition.create(id, displayName);
+            var roomIds = new ArrayList<String>();
             if (rooms != null) {
                 for (RoomDefinition room : rooms) {
-                    floor.roomIds.add(room.id());
+                    roomIds.add(room.id());
                 }
             }
+            floor.setRoomIds(roomIds);
             return floor;
         }
     }

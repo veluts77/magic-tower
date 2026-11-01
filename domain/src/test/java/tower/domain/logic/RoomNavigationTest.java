@@ -73,7 +73,8 @@ class RoomNavigationTest {
 
     @Test
     void moveLabelFallsBackToTheDestinationName() {
-        rooms.get(0).getExits().get(0).label = " ";
+        var exit = rooms.get(0).getExits().get(0);
+        rooms.get(0).getExits().set(0, RoomExit.create(exit.targetRoomId(), " "));
 
         GameAction move = resolver.availableActions(state, rooms).get(1);
 
@@ -142,10 +143,8 @@ class RoomNavigationTest {
     }
 
     private static FloorDefinition groundFloor() {
-        var floor = new FloorDefinition();
-        floor.id = "ground";
-        floor.displayName = "Ground Floor";
-        floor.roomIds = List.of("entrance", "hall", "alcove");
+        var floor = FloorDefinition.create("ground", "Ground Floor");
+        floor.setRoomIds(List.of("entrance", "hall", "alcove"));
         return floor;
     }
 
@@ -176,9 +175,6 @@ class RoomNavigationTest {
     }
 
     private static RoomExit exit(String targetRoomId, String label) {
-        var exit = new RoomExit();
-        exit.targetRoomId = targetRoomId;
-        exit.label = label;
-        return exit;
+        return RoomExit.create(targetRoomId, label);
     }
 }

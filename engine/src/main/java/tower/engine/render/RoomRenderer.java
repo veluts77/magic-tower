@@ -56,7 +56,7 @@ public class RoomRenderer {
 
         for (int i = 0; i < objectCount; i++) {
             ObjectDefinition object = room.getObjects().get(i);
-            String label = object.displayName == null ? "" : object.displayName;
+            String label = object.displayName();
             layout.setText(font, label);
             float labelX = roomX + slotWidth * i + (slotWidth - layout.width) / 2f;
             font.draw(batch, layout, labelX, shapeY + shapeSize + 22f);

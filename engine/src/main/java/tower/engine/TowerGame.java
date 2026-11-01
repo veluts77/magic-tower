@@ -16,7 +16,7 @@ public class TowerGame extends Game {
         FloorDefinition floor = loader.loadFloor("ground");
         Gdx.app.log(
                 "TowerGame",
-                "Loaded floor: " + floor.displayName + ", rooms: " + floor.roomCount());
+                "Loaded floor: " + floor.displayName() + ", rooms: " + floor.roomCount());
         setScreen(new GameScreen(loader.firstLoadedRoom()));
     }
 

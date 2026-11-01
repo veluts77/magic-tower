@@ -22,17 +22,17 @@ public class GameState {
         if (floor == null) {
             throw new IllegalArgumentException("Floor is missing");
         }
-        if (floor.id == null || floor.id.isBlank()) {
+        if (floor.id() == null || floor.id().isBlank()) {
             throw new IllegalArgumentException("Floor id is missing");
         }
-        if (floor.roomIds == null || floor.roomIds.isEmpty()) {
+        if (floor.getRoomIds() == null || floor.getRoomIds().isEmpty()) {
             throw new IllegalArgumentException("Floor has no rooms");
         }
-        String startingRoomId = floor.roomIds.get(0);
+        String startingRoomId = floor.getRoomIds().get(0);
         if (startingRoomId == null || startingRoomId.isBlank()) {
             throw new IllegalArgumentException("Starting room is missing");
         }
-        return new GameState(floor.id, startingRoomId);
+        return new GameState(floor.id(), startingRoomId);
     }
 
     public String currentFloorId() {

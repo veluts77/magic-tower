@@ -23,20 +23,21 @@ public class ActionResolver {
 
     private static void addMoveActions(List<GameAction> actions, RoomDefinition room, List<RoomDefinition> rooms) {
         for (RoomExit exit : room.getExits()) {
-            if (exit.targetRoomId == null || exit.targetRoomId.isBlank()) {
+            String targetRoomId = exit.targetRoomId();
+            if (targetRoomId == null || targetRoomId.isBlank()) {
                 continue;
             }
-            actions.add(GameAction.move(exit.targetRoomId, moveLabel(exit, Rooms.find(rooms, exit.targetRoomId))));
+            actions.add(GameAction.move(targetRoomId, moveLabel(exit, Rooms.find(rooms, targetRoomId))));
         }
     }
 
     private static String moveLabel(RoomExit exit, RoomDefinition destination) {
-        if (exit.label != null && !exit.label.isBlank()) {
-            return exit.label;
+        if (!exit.label().isBlank()) {
+            return exit.label();
         }
         if (!destination.displayName().isBlank()) {
             return "Go to " + destination.displayName();
         }
-        return "Go to " + exit.targetRoomId;
+        return "Go to " + exit.targetRoomId();
     }
 }
