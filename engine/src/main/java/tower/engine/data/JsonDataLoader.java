@@ -8,10 +8,18 @@ import tower.domain.data.FloorDefinition;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.RoomExit;
+import tower.domain.data.SpellDefinition;
+import tower.domain.data.SpellTarget;
 import tower.domain.service.DataLoader;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+
+import static java.util.Locale.ROOT;
+import static tower.domain.data.SpellTarget.CREATURE;
+import static tower.domain.data.SpellTarget.OBJECT;
+import static tower.domain.data.SpellTarget.ROOM;
 
 public class JsonDataLoader implements DataLoader {
 
@@ -57,6 +65,40 @@ public class JsonDataLoader implements DataLoader {
         return floor;
     }
 
+    @Override
+    public List<SpellDefinition> loadSpells() {
+        FileHandle directory = Gdx.files.internal("data/spells");
+        if (!directory.exists() || !directory.isDirectory()) {
+            Gdx.app.error("JsonDataLoader", "Spells directory not found: " + directory.path());
+            throw new IllegalArgumentException("Spells directory not found");
+        }
+        FileHandle[] files = directory.list(".json");
+        var spells = new ArrayList<SpellDefinition>();
+        if (files != null) {
+            for (FileHandle file : files) {
+                spells.add(readSpell(file));
+            }
+        }
+        spells.sort(Comparator.comparing(SpellDefinition::id));
+        return List.copyOf(spells);
+    }
+
+    private static SpellDefinition readSpell(FileHandle file) {
+        if (file == null || !file.exists()) {
+            throw new IllegalArgumentException("Spell file not found");
+        }
+        JsonValue root = new JsonReader().parse(file);
+        var spell = SpellDefinition.create(
+                text(root, "id"),
+                text(root, "displayName"),
+                text(root, "description"),
+                spellTarget(root));
+        if (spell.id().isBlank()) {
+            throw new IllegalArgumentException("Spell id is missing: " + file.path());
+        }
+        return spell;
+    }
+
     private static List<RoomDefinition> readRooms(JsonValue roomsJson) {
         var rooms = new ArrayList<RoomDefinition>();
         if (roomsJson == null) {
@@ -80,11 +122,13 @@ public class JsonDataLoader implements DataLoader {
             return objects;
         }
         for (JsonValue objectJson : objectsJson) {
-            objects.add(ObjectDefinition.create(
+            var object = ObjectDefinition.create(
                     text(objectJson, "id"),
                     text(objectJson, "displayName"),
                     text(objectJson, "type"),
-                    text(objectJson, "description")));
+                    text(objectJson, "description"));
+            object.setSupportedSpells(readIds(objectJson.get("supportedSpells")));
+            objects.add(object);
         }
         return objects;
     }
@@ -98,6 +142,33 @@ public class JsonDataLoader implements DataLoader {
             exits.add(RoomExit.create(text(exitJson, "targetRoomId"), text(exitJson, "label")));
         }
         return exits;
+    }
+
+    private static List<String> readIds(JsonValue array) {
+        var ids = new ArrayList<String>();
+        if (array == null || !array.isArray()) {
+            return ids;
+        }
+        for (JsonValue value : array) {
+            String id = value.asString();
+            if (id != null && !id.isBlank()) {
+                ids.add(id);
+            }
+        }
+        return ids;
+    }
+
+    private static SpellTarget spellTarget(JsonValue node) {
+        String value = text(node, "target");
+        if (value.isBlank()) {
+            return OBJECT;
+        }
+        return switch (value.toLowerCase(ROOT)) {
+            case "object" -> OBJECT;
+            case "room" -> ROOM;
+            case "creature" -> CREATURE;
+            default -> throw new IllegalArgumentException("Unknown spell target: " + value);
+        };
     }
 
     private static String text(JsonValue node, String name) {

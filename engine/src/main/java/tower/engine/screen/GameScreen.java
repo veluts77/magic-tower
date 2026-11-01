@@ -10,6 +10,7 @@ import tower.domain.action.ActionResult;
 import tower.domain.action.GameAction;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
+import tower.domain.data.SpellDefinition;
 import tower.domain.logic.ActionExecutor;
 import tower.domain.logic.ActionResolver;
 import tower.domain.state.GameState;
@@ -21,6 +22,7 @@ import java.util.List;
 
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
 import static tower.domain.action.ActionType.LOOK;
+import static tower.domain.state.RoomState.LIT;
 import static tower.engine.input.ActionKeys.NONE;
 import static tower.engine.input.ActionKeys.UNAVAILABLE;
 import static tower.engine.input.ActionKeys.modeSwitchPressed;
@@ -32,6 +34,7 @@ public class GameScreen implements Screen {
             new GameAction("unavailable", LOOK, "unavailable", "Unavailable");
 
     private final List<RoomDefinition> rooms;
+    private final List<SpellDefinition> spells;
     private final GameState state;
     private final ActionResolver resolver = new ActionResolver();
     private final ActionExecutor executor = new ActionExecutor();
@@ -44,12 +47,13 @@ public class GameScreen implements Screen {
     private String message = "";
     private Mode mode = Mode.ROOM;
 
-    public GameScreen(GameState state, List<RoomDefinition> rooms) {
+    public GameScreen(GameState state, List<RoomDefinition> rooms, List<SpellDefinition> spells) {
         if (state == null) {
             throw new IllegalArgumentException("Game state is missing");
         }
         this.state = state;
         this.rooms = rooms == null ? List.of() : List.copyOf(rooms);
+        this.spells = spells == null ? List.of() : List.copyOf(spells);
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
@@ -81,7 +85,8 @@ public class GameScreen implements Screen {
                 camera.viewportWidth,
                 camera.viewportHeight,
                 inset,
-                mode == Mode.SELECT_OBJECT);
+                mode == Mode.SELECT_OBJECT,
+                state);
         actionPanel.draw(heading, lines, message, batch, font, width, inset);
     }
 
@@ -139,7 +144,7 @@ public class GameScreen implements Screen {
             return;
         }
         GameAction action = index == UNAVAILABLE ? UNAVAILABLE_ACTION : actions.get(index);
-        message = text(executor.execute(state, rooms, action));
+        message = text(executor.execute(state, rooms, action, spells));
     }
 
     private void chooseObject() {
@@ -149,7 +154,7 @@ public class GameScreen implements Screen {
             return;
         }
         if (index == UNAVAILABLE) {
-            message = text(executor.execute(state, rooms, UNAVAILABLE_ACTION));
+            message = text(executor.execute(state, rooms, UNAVAILABLE_ACTION, spells));
             return;
         }
         state.selectObject(objects.get(index).id());
@@ -157,13 +162,13 @@ public class GameScreen implements Screen {
     }
 
     private void chooseObjectAction() {
-        List<GameAction> actions = resolver.availableActions(state, rooms, state.selectedObjectId());
+        List<GameAction> actions = objectActions();
         int index = selectedIndex(actions.size());
         if (index == NONE) {
             return;
         }
         GameAction action = index == UNAVAILABLE ? UNAVAILABLE_ACTION : actions.get(index);
-        message = text(executor.execute(state, rooms, action));
+        message = text(executor.execute(state, rooms, action, spells));
         if (index != UNAVAILABLE) {
             leaveObject();
         }
@@ -182,7 +187,7 @@ public class GameScreen implements Screen {
         return switch (mode) {
             case ROOM -> labels(resolver.availableActions(state, rooms));
             case SELECT_OBJECT -> objectLabels(currentRoom().getObjects());
-            case OBJECT_ACTIONS -> labels(resolver.availableActions(state, rooms, state.selectedObjectId()));
+            case OBJECT_ACTIONS -> labels(objectActions());
         };
     }
 
@@ -194,12 +199,15 @@ public class GameScreen implements Screen {
         };
     }
 
+    private List<GameAction> objectActions() {
+        return resolver.availableActions(state, rooms, state.selectedObjectId(), spells);
+    }
+
     private String selectedName() {
         String selectedId = state.selectedObjectId();
         for (ObjectDefinition object : currentRoom().getObjects()) {
             if (object.id().equals(selectedId)) {
-                String name = object.displayName();
-                return name.isBlank() ? selectedId : name;
+                return objectName(object);
             }
         }
         if (selectedId == null || selectedId.isBlank()) {
@@ -216,13 +224,23 @@ public class GameScreen implements Screen {
         return lines;
     }
 
-    private static List<String> objectLabels(List<ObjectDefinition> objects) {
+    private List<String> objectLabels(List<ObjectDefinition> objects) {
         var lines = new ArrayList<String>();
         for (ObjectDefinition object : objects) {
-            String name = object.displayName();
-            lines.add(name.isBlank() ? object.id() : name);
+            lines.add(objectName(object));
         }
         return lines;
+    }
+
+    private String objectName(ObjectDefinition object) {
+        String name = object.displayName();
+        if (name.isBlank()) {
+            name = object.id();
+        }
+        if (LIT.equals(state.objectCondition(object.id()))) {
+            return name + " (lit)";
+        }
+        return name;
     }
 
     private RoomDefinition currentRoom() {

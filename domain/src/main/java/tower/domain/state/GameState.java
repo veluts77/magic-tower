@@ -3,7 +3,9 @@ package tower.domain.state;
 import tower.domain.data.FloorDefinition;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class GameState {
@@ -11,6 +13,8 @@ public class GameState {
     private final String floorId;
     private String currentRoomId;
     private String selectedObjectId;
+    private final PlayerState player = new PlayerState();
+    private final Map<String, RoomState> roomStates = new LinkedHashMap<>();
     private final Set<String> visitedRoomIds = new LinkedHashSet<>();
 
     private GameState(String floorId, String startingRoomId) {
@@ -61,6 +65,23 @@ public class GameState {
 
     public void clearSelection() {
         selectedObjectId = null;
+    }
+
+    public PlayerState player() {
+        return player;
+    }
+
+    public String objectCondition(String objectId) {
+        return roomState(currentRoomId).objectCondition(objectId);
+    }
+
+    public void setObjectCondition(String objectId, String condition) {
+        roomState(currentRoomId).setObjectCondition(objectId, condition);
+    }
+
+    private RoomState roomState(String roomId) {
+        String key = roomId == null ? "" : roomId;
+        return roomStates.computeIfAbsent(key, ignored -> new RoomState());
     }
 
     public void enterRoom(String roomId) {

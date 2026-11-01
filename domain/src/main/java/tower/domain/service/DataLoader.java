@@ -1,8 +1,13 @@
 package tower.domain.service;
 
 import tower.domain.data.FloorDefinition;
+import tower.domain.data.SpellDefinition;
+
+import java.util.List;
 
 public interface DataLoader {
 
     FloorDefinition loadFloor(String floorId);
+
+    List<SpellDefinition> loadSpells();
 }

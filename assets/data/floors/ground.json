@@ -40,7 +40,8 @@
           "id": "brazier",
           "displayName": "Cold Brazier",
           "type": "fixture",
-          "description": "The iron bowl is cold. Ash has settled into a hard grey crust."
+          "description": "The iron bowl is cold. Ash has settled into a hard grey crust.",
+          "supportedSpells": ["spark"]
         },
         {
           "id": "inscription",
