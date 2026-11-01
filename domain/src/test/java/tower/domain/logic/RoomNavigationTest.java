@@ -3,7 +3,6 @@ package tower.domain.logic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tower.domain.action.ActionResult;
-import tower.domain.action.ActionType;
 import tower.domain.action.GameAction;
 import tower.domain.data.FloorDefinition;
 import tower.domain.data.RoomDefinition;
@@ -19,6 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static tower.domain.action.ActionResult.Change.CURRENT_ROOM;
+import static tower.domain.action.ActionResult.Change.VISITED_ROOMS;
+import static tower.domain.action.ActionType.LOOK;
+import static tower.domain.action.ActionType.MOVE;
 
 class RoomNavigationTest {
 
@@ -55,13 +58,13 @@ class RoomNavigationTest {
 
         GameAction look = actions.get(0);
         assertEquals("look", look.id);
-        assertEquals(ActionType.LOOK, look.type);
+        assertEquals(LOOK, look.type);
         assertNull(look.target);
         assertEquals("Look around", look.label);
 
         GameAction move = actions.get(1);
         assertEquals("move:hall", move.id);
-        assertEquals(ActionType.MOVE, move.type);
+        assertEquals(MOVE, move.type);
         assertEquals("hall", move.target);
         assertEquals("Go to the Quiet Hall", move.label);
 
@@ -83,7 +86,7 @@ class RoomNavigationTest {
 
         assertTrue(result.succeeded);
         assertEquals("You move to Quiet Hall.", result.message);
-        assertEquals(List.of(ActionResult.Change.CURRENT_ROOM, ActionResult.Change.VISITED_ROOMS), result.changes);
+        assertEquals(List.of(CURRENT_ROOM, VISITED_ROOMS), result.changes);
     }
 
     @Test
@@ -120,7 +123,7 @@ class RoomNavigationTest {
         ActionResult back = executor.execute(state, rooms, GameAction.move("entrance", "Go back"));
 
         assertTrue(back.succeeded);
-        assertEquals(List.of(ActionResult.Change.CURRENT_ROOM), back.changes);
+        assertEquals(List.of(CURRENT_ROOM), back.changes);
         assertEquals("entrance", state.currentRoomId());
         assertEquals(List.of("entrance", "hall"), new ArrayList<>(state.visitedRoomIds()));
     }

@@ -2,10 +2,11 @@ package tower.engine;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import tower.domain.data.FloorDefinition;
 import tower.engine.data.JsonDataLoader;
 import tower.engine.screen.GameScreen;
+
+import static com.badlogic.gdx.Input.Keys.ESCAPE;
 
 public class TowerGame extends Game {
 
@@ -21,7 +22,7 @@ public class TowerGame extends Game {
 
     @Override
     public void render() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+        if (Gdx.input.isKeyJustPressed(ESCAPE)) {
             Gdx.app.exit();
         }
 

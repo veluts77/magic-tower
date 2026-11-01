@@ -1,5 +1,8 @@
 package tower.domain.action;
 
+import static tower.domain.action.ActionType.LOOK;
+import static tower.domain.action.ActionType.MOVE;
+
 public class GameAction {
 
     public final String id;
@@ -15,10 +18,10 @@ public class GameAction {
     }
 
     public static GameAction look() {
-        return new GameAction("look", ActionType.LOOK, null, "Look around");
+        return new GameAction("look", LOOK, null, "Look around");
     }
 
     public static GameAction move(String targetRoomId, String label) {
-        return new GameAction("move:" + targetRoomId, ActionType.MOVE, targetRoomId, label);
+        return new GameAction("move:" + targetRoomId, MOVE, targetRoomId, label);
     }
 }

@@ -8,6 +8,9 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 
+import static com.badlogic.gdx.graphics.Color.WHITE;
+import static com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled;
+
 public class RoomRenderer {
 
     private static final Color ROOM_COLOR = new Color(0.16f, 0.20f, 0.30f, 1f);
@@ -27,7 +30,7 @@ public class RoomRenderer {
         float roomWidth = screenWidth - 96f;
         float roomHeight = screenHeight - 128f;
 
-        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        shapes.begin(Filled);
         shapes.setColor(ROOM_COLOR);
         shapes.rect(roomX, roomY, roomWidth, roomHeight);
 
@@ -45,7 +48,7 @@ public class RoomRenderer {
         shapes.circle(roomX + 40f, roomY + 36f, 12f);
         shapes.end();
 
-        font.setColor(Color.WHITE);
+        font.setColor(WHITE);
         batch.begin();
         String title = room.displayName == null ? "" : room.displayName;
         layout.setText(font, title);

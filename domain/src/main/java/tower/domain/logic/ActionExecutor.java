@@ -1,7 +1,6 @@
 package tower.domain.logic;
 
 import tower.domain.action.ActionResult;
-import tower.domain.action.ActionType;
 import tower.domain.action.GameAction;
 import tower.domain.data.RoomDefinition;
 import tower.domain.state.GameState;
@@ -12,6 +11,7 @@ import java.util.Objects;
 
 import static tower.domain.action.ActionResult.Change.CURRENT_ROOM;
 import static tower.domain.action.ActionResult.Change.VISITED_ROOMS;
+import static tower.domain.action.ActionType.MOVE;
 
 public class ActionExecutor {
 
@@ -23,7 +23,7 @@ public class ActionExecutor {
         }
         GameAction available = match(resolver.availableActions(state, rooms), action);
         if (available == null) {
-            var message = action.type == ActionType.MOVE
+            var message = action.type == MOVE
                     ? "That room is not connected."
                     : "That action is not available.";
             return ActionResult.rejected(message);
