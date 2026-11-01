@@ -1,0 +1,28 @@
+---
+description: Компактный Java-стиль — var, статические импорты констант, один возврат
+globs: "**/*.java"
+alwaysApply: false
+---
+
+# Java style
+
+Полный текст — в `docs/CODING_AGENT_RULES.md`, секция 3. При генерации Java применяй это, где метод становится короче и тип не прячется.
+
+- `var`, если тип очевиден справа (`new ArrayList<>()`, строка, вызов с явным типом). Не используй `var`, если тип справа неочевиден.
+- Статический импорт констант и значений enum, которые рядом повторяются с длинным префиксом. Одиночное имя не импортируй.
+- Несколько веток с одним и тем же результатом, которые отличаются только набором флагов или аргументов, сверни в один возврат.
+
+```java
+import static tower.domain.action.ActionResult.Change.CURRENT_ROOM;
+import static tower.domain.action.ActionResult.Change.VISITED_ROOMS;
+
+var changes = new ArrayList<ActionResult.Change>();
+if (roomChanged) {
+    changes.add(CURRENT_ROOM);
+}
+if (newlyVisited) {
+    changes.add(VISITED_ROOMS);
+}
+var message = "You move to " + name + ".";
+return ActionResult.succeeded(message, changes.toArray(ActionResult.Change[]::new));
+```

@@ -6,8 +6,12 @@ import tower.domain.action.GameAction;
 import tower.domain.data.RoomDefinition;
 import tower.domain.state.GameState;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static tower.domain.action.ActionResult.Change.CURRENT_ROOM;
+import static tower.domain.action.ActionResult.Change.VISITED_ROOMS;
 
 public class ActionExecutor {
 
@@ -19,10 +23,10 @@ public class ActionExecutor {
         }
         GameAction available = match(resolver.availableActions(state, rooms), action);
         if (available == null) {
-            if (action.type == ActionType.MOVE) {
-                return ActionResult.rejected("That room is not connected.");
-            }
-            return ActionResult.rejected("That action is not available.");
+            var message = action.type == ActionType.MOVE
+                    ? "That room is not connected."
+                    : "That action is not available.";
+            return ActionResult.rejected(message);
         }
         return switch (available.type) {
             case LOOK -> look(state, rooms);
@@ -55,16 +59,14 @@ public class ActionExecutor {
         String name = destination != null && destination.displayName != null && !destination.displayName.isBlank()
                 ? destination.displayName
                 : targetRoomId;
-        String message = "You move to " + name + ".";
-        if (roomChanged && newlyVisited) {
-            return ActionResult.succeeded(message, ActionResult.Change.CURRENT_ROOM, ActionResult.Change.VISITED_ROOMS);
-        }
+        var changes = new ArrayList<ActionResult.Change>();
         if (roomChanged) {
-            return ActionResult.succeeded(message, ActionResult.Change.CURRENT_ROOM);
+            changes.add(CURRENT_ROOM);
         }
         if (newlyVisited) {
-            return ActionResult.succeeded(message, ActionResult.Change.VISITED_ROOMS);
+            changes.add(VISITED_ROOMS);
         }
-        return ActionResult.succeeded(message);
+        var message = "You move to " + name + ".";
+        return ActionResult.succeeded(message, changes.toArray(ActionResult.Change[]::new));
     }
 }

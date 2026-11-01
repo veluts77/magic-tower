@@ -11,7 +11,7 @@ public class TowerGame extends Game {
 
     @Override
     public void create() {
-        JsonDataLoader loader = new JsonDataLoader();
+        var loader = new JsonDataLoader();
         FloorDefinition floor = loader.loadFloor("ground");
         Gdx.app.log(
                 "TowerGame",

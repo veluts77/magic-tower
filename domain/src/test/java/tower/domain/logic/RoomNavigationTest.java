@@ -105,7 +105,7 @@ class RoomNavigationTest {
 
     @Test
     void unavailableActionDoesNotChangeState() {
-        Set<String> visitedBefore = new LinkedHashSet<>(state.visitedRoomIds());
+        var visitedBefore = new LinkedHashSet<String>(state.visitedRoomIds());
         String roomBefore = state.currentRoomId();
 
         executor.execute(state, rooms, GameAction.move("alcove", "Go to the Side Alcove"));
@@ -127,7 +127,7 @@ class RoomNavigationTest {
 
     @Test
     void lookReturnsTheRoomDescriptionWithoutChangingState() {
-        Set<String> visitedBefore = new LinkedHashSet<>(state.visitedRoomIds());
+        var visitedBefore = new LinkedHashSet<String>(state.visitedRoomIds());
 
         ActionResult result = executor.execute(state, rooms, GameAction.look());
 
@@ -139,7 +139,7 @@ class RoomNavigationTest {
     }
 
     private static FloorDefinition groundFloor() {
-        FloorDefinition floor = new FloorDefinition();
+        var floor = new FloorDefinition();
         floor.id = "ground";
         floor.displayName = "Ground Floor";
         floor.roomIds = List.of("entrance", "hall", "alcove");
@@ -167,7 +167,7 @@ class RoomNavigationTest {
     }
 
     private static RoomDefinition room(String id, String displayName, String description, RoomExit... exits) {
-        RoomDefinition room = new RoomDefinition();
+        var room = new RoomDefinition();
         room.id = id;
         room.displayName = displayName;
         room.description = description;
@@ -176,7 +176,7 @@ class RoomNavigationTest {
     }
 
     private static RoomExit exit(String targetRoomId, String label) {
-        RoomExit exit = new RoomExit();
+        var exit = new RoomExit();
         exit.targetRoomId = targetRoomId;
         exit.label = label;
         return exit;

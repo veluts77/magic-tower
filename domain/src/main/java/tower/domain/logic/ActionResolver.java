@@ -15,7 +15,7 @@ public class ActionResolver {
             return List.of();
         }
         RoomDefinition room = Rooms.find(rooms, state.currentRoomId());
-        List<GameAction> actions = new ArrayList<>();
+        var actions = new ArrayList<GameAction>();
         actions.add(GameAction.look());
         addMoveActions(actions, room, rooms);
         return List.copyOf(actions);

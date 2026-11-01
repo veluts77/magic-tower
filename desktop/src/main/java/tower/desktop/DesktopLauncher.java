@@ -7,7 +7,7 @@ import tower.engine.TowerGame;
 public class DesktopLauncher {
 
     public static void main(String[] args) {
-        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+        var config = new Lwjgl3ApplicationConfiguration();
 
         config.setTitle("Tower Game");
         config.setWindowedMode(960, 540);

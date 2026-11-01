@@ -31,11 +31,11 @@ public class JsonDataLoader implements DataLoader {
             throw new IllegalArgumentException("Floor file not found: " + floorId);
         }
 
-        Json json = new Json();
+        var json = new Json();
         json.setElementType(FloorFile.class, "rooms", RoomDefinition.class);
         json.setElementType(RoomDefinition.class, "objects", ObjectDefinition.class);
 
-        FloorFile fileData = json.fromJson(FloorFile.class, file);
+        var fileData = json.fromJson(FloorFile.class, file);
         if (fileData.rooms != null) {
             loadedRooms = new ArrayList<>(fileData.rooms);
         } else {
@@ -50,7 +50,7 @@ public class JsonDataLoader implements DataLoader {
         public List<RoomDefinition> rooms = new ArrayList<>();
 
         FloorDefinition createFloorDefinition() {
-            FloorDefinition floor = new FloorDefinition();
+            var floor = new FloorDefinition();
             floor.id = id;
             floor.displayName = displayName;
             floor.roomIds = new ArrayList<>();
