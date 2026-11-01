@@ -1,5 +1,6 @@
 package tower.domain.action;
 
+import static tower.domain.action.ActionType.EXAMINE;
 import static tower.domain.action.ActionType.LOOK;
 import static tower.domain.action.ActionType.MOVE;
 
@@ -23,5 +24,9 @@ public class GameAction {
 
     public static GameAction move(String targetRoomId, String label) {
         return new GameAction("move:" + targetRoomId, MOVE, targetRoomId, label);
+    }
+
+    public static GameAction examine(String objectId, String label) {
+        return new GameAction("examine:" + objectId, EXAMINE, objectId, label);
     }
 }

@@ -2,6 +2,7 @@ package tower.domain.logic;
 
 import tower.domain.action.ActionResult;
 import tower.domain.action.GameAction;
+import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.state.GameState;
 
@@ -11,6 +12,7 @@ import java.util.Objects;
 
 import static tower.domain.action.ActionResult.Change.CURRENT_ROOM;
 import static tower.domain.action.ActionResult.Change.VISITED_ROOMS;
+import static tower.domain.action.ActionType.EXAMINE;
 import static tower.domain.action.ActionType.MOVE;
 
 public class ActionExecutor {
@@ -21,6 +23,13 @@ public class ActionExecutor {
         if (state == null || action == null || action.type == null) {
             return ActionResult.rejected("That action is not available.");
         }
+        return switch (action.type) {
+            case EXAMINE -> examine(state, rooms, action);
+            case LOOK, MOVE -> roomAction(state, rooms, action);
+        };
+    }
+
+    private ActionResult roomAction(GameState state, List<RoomDefinition> rooms, GameAction action) {
         GameAction available = match(resolver.availableActions(state, rooms), action);
         if (available == null) {
             var message = action.type == MOVE
@@ -28,10 +37,10 @@ public class ActionExecutor {
                     : "That action is not available.";
             return ActionResult.rejected(message);
         }
-        return switch (available.type) {
-            case LOOK -> look(state, rooms);
-            case MOVE -> move(state, rooms, available);
-        };
+        if (available.type == MOVE) {
+            return move(state, rooms, available);
+        }
+        return look(state, rooms);
     }
 
     private static GameAction match(List<GameAction> available, GameAction requested) {
@@ -41,6 +50,16 @@ public class ActionExecutor {
             }
         }
         return null;
+    }
+
+    private ActionResult examine(GameState state, List<RoomDefinition> rooms, GameAction action) {
+        GameAction available = match(resolver.availableActions(state, rooms, action.target), action);
+        if (available == null) {
+            return ActionResult.rejected("That action is not available.");
+        }
+        ObjectDefinition object = Rooms.findObject(rooms, state.currentRoomId(), available.target);
+        String message = object == null ? "" : object.description();
+        return ActionResult.succeeded(message);
     }
 
     private static ActionResult look(GameState state, List<RoomDefinition> rooms) {

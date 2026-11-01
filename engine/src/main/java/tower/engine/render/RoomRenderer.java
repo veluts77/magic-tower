@@ -24,7 +24,7 @@ public class RoomRenderer {
     private final GlyphLayout layout = new GlyphLayout();
 
     public void draw(RoomDefinition room, ShapeRenderer shapes, SpriteBatch batch, BitmapFont font,
-                     float screenWidth, float screenHeight, float bottomInset) {
+                     float screenWidth, float screenHeight, float bottomInset, boolean numberObjects) {
         float roomX = 48f;
         float roomY = 56f + bottomInset;
         float roomWidth = screenWidth - 96f;
@@ -57,6 +57,9 @@ public class RoomRenderer {
         for (int i = 0; i < objectCount; i++) {
             ObjectDefinition object = room.getObjects().get(i);
             String label = object.displayName();
+            if (numberObjects) {
+                label = (i + 1) + ": " + label;
+            }
             layout.setText(font, label);
             float labelX = roomX + slotWidth * i + (slotWidth - layout.width) / 2f;
             font.draw(batch, layout, labelX, shapeY + shapeSize + 22f);

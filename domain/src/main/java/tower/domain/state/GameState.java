@@ -10,6 +10,7 @@ public class GameState {
 
     private final String floorId;
     private String currentRoomId;
+    private String selectedObjectId;
     private final Set<String> visitedRoomIds = new LinkedHashSet<>();
 
     private GameState(String floorId, String startingRoomId) {
@@ -45,6 +46,21 @@ public class GameState {
 
     public Set<String> visitedRoomIds() {
         return Collections.unmodifiableSet(visitedRoomIds);
+    }
+
+    public String selectedObjectId() {
+        return selectedObjectId;
+    }
+
+    public void selectObject(String objectId) {
+        if (objectId == null || objectId.isBlank()) {
+            throw new IllegalArgumentException("Object id is missing");
+        }
+        selectedObjectId = objectId;
+    }
+
+    public void clearSelection() {
+        selectedObjectId = null;
     }
 
     public void enterRoom(String roomId) {

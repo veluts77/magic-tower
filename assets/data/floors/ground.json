@@ -16,7 +16,8 @@
         {
           "id": "arch",
           "displayName": "Stone Arch",
-          "type": "passage"
+          "type": "passage",
+          "description": "The stones are worn smooth. Faint marks cover the inner curve."
         }
       ]
     },
@@ -38,12 +39,14 @@
         {
           "id": "brazier",
           "displayName": "Cold Brazier",
-          "type": "fixture"
+          "type": "fixture",
+          "description": "The iron bowl is cold. Ash has settled into a hard grey crust."
         },
         {
           "id": "inscription",
           "displayName": "Faded Inscription",
-          "type": "clue"
+          "type": "clue",
+          "description": "The letters have faded. A few words still speak of a quiet flame."
         }
       ]
     },
@@ -61,7 +64,8 @@
         {
           "id": "pedestal",
           "displayName": "Empty Pedestal",
-          "type": "fixture"
+          "type": "fixture",
+          "description": "The pedestal is empty. A round hollow marks where something once stood."
         }
       ]
     }

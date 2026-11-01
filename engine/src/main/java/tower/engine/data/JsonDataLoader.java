@@ -83,7 +83,8 @@ public class JsonDataLoader implements DataLoader {
             objects.add(ObjectDefinition.create(
                     text(objectJson, "id"),
                     text(objectJson, "displayName"),
-                    text(objectJson, "type")));
+                    text(objectJson, "type"),
+                    text(objectJson, "description")));
         }
         return objects;
     }

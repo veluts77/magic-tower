@@ -1,6 +1,7 @@
 package tower.domain.logic;
 
 import tower.domain.action.GameAction;
+import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.RoomExit;
 import tower.domain.state.GameState;
@@ -19,6 +20,18 @@ public class ActionResolver {
         actions.add(GameAction.look());
         addMoveActions(actions, room, rooms);
         return List.copyOf(actions);
+    }
+
+    public List<GameAction> availableActions(GameState state, List<RoomDefinition> rooms, String objectId) {
+        if (state == null) {
+            return List.of();
+        }
+        ObjectDefinition object = Rooms.findObject(rooms, state.currentRoomId(), objectId);
+        if (object == null) {
+            return List.of();
+        }
+        String name = object.displayName().isBlank() ? objectId : object.displayName();
+        return List.of(GameAction.examine(objectId, "Examine " + name));
     }
 
     private static void addMoveActions(List<GameAction> actions, RoomDefinition room, List<RoomDefinition> rooms) {

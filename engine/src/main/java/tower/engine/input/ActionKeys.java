@@ -2,6 +2,7 @@ package tower.engine.input;
 
 import com.badlogic.gdx.Gdx;
 
+import static com.badlogic.gdx.Input.Keys.TAB;
 import static com.badlogic.gdx.Input.Keys.NUM_1;
 import static com.badlogic.gdx.Input.Keys.NUM_2;
 import static com.badlogic.gdx.Input.Keys.NUM_3;
@@ -41,5 +42,9 @@ public final class ActionKeys {
             }
         }
         return NONE;
+    }
+
+    public static boolean modeSwitchPressed() {
+        return Gdx.input.isKeyJustPressed(TAB);
     }
 }
