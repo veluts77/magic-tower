@@ -10,14 +10,11 @@ final class Rooms {
     }
 
     static RoomDefinition find(List<RoomDefinition> rooms, String roomId) {
-        if (rooms == null || roomId == null) {
-            return null;
-        }
         for (RoomDefinition room : rooms) {
-            if (room != null && roomId.equals(room.id)) {
+            if (room.sameId(roomId)) {
                 return room;
             }
         }
-        return null;
+        return RoomDefinition.createNonExistingRoom();
     }
 }

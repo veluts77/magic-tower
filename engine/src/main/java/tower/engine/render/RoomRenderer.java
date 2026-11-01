@@ -34,7 +34,7 @@ public class RoomRenderer {
         shapes.setColor(ROOM_COLOR);
         shapes.rect(roomX, roomY, roomWidth, roomHeight);
 
-        int objectCount = room.objects == null ? 0 : room.objects.size();
+        int objectCount = room.getObjects().size();
         float shapeSize = 56f;
         float slotWidth = objectCount == 0 ? 0f : roomWidth / objectCount;
         float shapeY = roomY + roomHeight * 0.45f;
@@ -50,19 +50,19 @@ public class RoomRenderer {
 
         font.setColor(WHITE);
         batch.begin();
-        String title = room.displayName == null ? "" : room.displayName;
+        String title = room.displayName();
         layout.setText(font, title);
         font.draw(batch, layout, (screenWidth - layout.width) / 2f, screenHeight - 28f);
 
         for (int i = 0; i < objectCount; i++) {
-            ObjectDefinition object = room.objects.get(i);
+            ObjectDefinition object = room.getObjects().get(i);
             String label = object.displayName == null ? "" : object.displayName;
             layout.setText(font, label);
             float labelX = roomX + slotWidth * i + (slotWidth - layout.width) / 2f;
             font.draw(batch, layout, labelX, shapeY + shapeSize + 22f);
         }
 
-        font.draw(batch, "room: " + room.id, 12f, 36f);
+        font.draw(batch, "room: " + room.id(), 12f, 36f);
         font.draw(batch, "objects: " + objectCount, 12f, 16f);
         batch.end();
     }

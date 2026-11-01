@@ -56,7 +56,7 @@ public class JsonDataLoader implements DataLoader {
             floor.roomIds = new ArrayList<>();
             if (rooms != null) {
                 for (RoomDefinition room : rooms) {
-                    floor.roomIds.add(room.id);
+                    floor.roomIds.add(room.id());
                 }
             }
             return floor;

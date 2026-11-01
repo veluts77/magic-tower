@@ -5,9 +5,55 @@ import java.util.List;
 
 public class RoomDefinition {
 
-    public String id;
-    public String displayName;
-    public String description;
-    public List<ObjectDefinition> objects = new ArrayList<>();
-    public List<RoomExit> exits = new ArrayList<>();
+    private String id;
+    private String displayName;
+    private String description;
+    private List<ObjectDefinition> objects = new ArrayList<>();
+    private List<RoomExit> exits = new ArrayList<>();
+
+    public static RoomDefinition create(String id, String displayName, String description) {
+        return new RoomDefinition(id, displayName, description);
+    }
+
+    public static RoomDefinition createNonExistingRoom() {
+        return new RoomDefinition("", "Non existing room", "Non existing room");
+    }
+
+    private RoomDefinition(String id, String displayName, String description) {
+        this.id = id;
+        this.displayName = displayName;
+        this.description = description;
+    }
+
+    public List<ObjectDefinition> getObjects() {
+        return objects;
+    }
+
+    public void setObjects(List<ObjectDefinition> objects) {
+        this.objects = objects;
+    }
+
+    public List<RoomExit> getExits() {
+        return exits;
+    }
+
+    public void setExits(List<RoomExit> exits) {
+        this.exits = exits;
+    }
+
+    public String displayName() {
+        return displayName == null ? "" : displayName;
+    }
+
+    public String description() {
+        return description == null ? "" : description;
+    }
+
+    public boolean sameId(String id) {
+        return this.id.equals(id);
+    }
+
+    public String id() {
+        return id;
+    }
 }

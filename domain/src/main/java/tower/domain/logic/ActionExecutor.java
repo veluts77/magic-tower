@@ -45,7 +45,7 @@ public class ActionExecutor {
 
     private static ActionResult look(GameState state, List<RoomDefinition> rooms) {
         RoomDefinition room = Rooms.find(rooms, state.currentRoomId());
-        String message = room == null || room.description == null ? "" : room.description;
+        String message = room == null ? "" : room.description();
         return ActionResult.succeeded(message);
     }
 
@@ -56,9 +56,9 @@ public class ActionExecutor {
         state.enterRoom(targetRoomId);
 
         RoomDefinition destination = Rooms.find(rooms, targetRoomId);
-        String name = destination != null && destination.displayName != null && !destination.displayName.isBlank()
-                ? destination.displayName
-                : targetRoomId;
+        String name = destination == null || destination.displayName().isBlank()
+                ? targetRoomId
+                : destination.displayName();
         var changes = new ArrayList<ActionResult.Change>();
         if (roomChanged) {
             changes.add(CURRENT_ROOM);

@@ -22,11 +22,8 @@ public class ActionResolver {
     }
 
     private static void addMoveActions(List<GameAction> actions, RoomDefinition room, List<RoomDefinition> rooms) {
-        if (room == null || room.exits == null) {
-            return;
-        }
-        for (RoomExit exit : room.exits) {
-            if (exit == null || exit.targetRoomId == null || exit.targetRoomId.isBlank()) {
+        for (RoomExit exit : room.getExits()) {
+            if (exit.targetRoomId == null || exit.targetRoomId.isBlank()) {
                 continue;
             }
             actions.add(GameAction.move(exit.targetRoomId, moveLabel(exit, Rooms.find(rooms, exit.targetRoomId))));
@@ -37,8 +34,8 @@ public class ActionResolver {
         if (exit.label != null && !exit.label.isBlank()) {
             return exit.label;
         }
-        if (destination != null && destination.displayName != null && !destination.displayName.isBlank()) {
-            return "Go to " + destination.displayName;
+        if (!destination.displayName().isBlank()) {
+            return "Go to " + destination.displayName();
         }
         return "Go to " + exit.targetRoomId;
     }

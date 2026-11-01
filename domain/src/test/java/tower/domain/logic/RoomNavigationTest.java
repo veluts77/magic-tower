@@ -73,7 +73,7 @@ class RoomNavigationTest {
 
     @Test
     void moveLabelFallsBackToTheDestinationName() {
-        rooms.get(0).exits.get(0).label = " ";
+        rooms.get(0).getExits().get(0).label = " ";
 
         GameAction move = resolver.availableActions(state, rooms).get(1);
 
@@ -170,11 +170,8 @@ class RoomNavigationTest {
     }
 
     private static RoomDefinition room(String id, String displayName, String description, RoomExit... exits) {
-        var room = new RoomDefinition();
-        room.id = id;
-        room.displayName = displayName;
-        room.description = description;
-        room.exits = new ArrayList<>(List.of(exits));
+        var room = RoomDefinition.create(id, displayName, description);
+        room.setExits(new ArrayList<>(List.of(exits)));
         return room;
     }
 
