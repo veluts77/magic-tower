@@ -25,6 +25,8 @@ public class ActionResult {
     public enum Change {
         CURRENT_ROOM,
         VISITED_ROOMS,
-        OBJECT_CONDITION
+        OBJECT_CONDITION,
+        SPIRIT_SUMMONED,
+        REVEALED_OBJECTS
     }
 }

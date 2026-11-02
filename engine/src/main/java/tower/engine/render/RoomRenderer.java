@@ -9,6 +9,8 @@ import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.state.GameState;
 
+import java.util.List;
+
 import static com.badlogic.gdx.graphics.Color.WHITE;
 import static com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled;
 import static tower.domain.state.RoomState.LIT;
@@ -38,12 +40,13 @@ public class RoomRenderer {
         shapes.setColor(ROOM_COLOR);
         shapes.rect(roomX, roomY, roomWidth, roomHeight);
 
-        int objectCount = room.getObjects().size();
+        List<ObjectDefinition> objects = visibleObjects(room, state);
+        int objectCount = objects.size();
         float shapeSize = 56f;
         float slotWidth = objectCount == 0 ? 0f : roomWidth / objectCount;
         float shapeY = roomY + roomHeight * 0.45f;
         for (int i = 0; i < objectCount; i++) {
-            ObjectDefinition object = room.getObjects().get(i);
+            ObjectDefinition object = objects.get(i);
             float shapeX = roomX + slotWidth * i + (slotWidth - shapeSize) / 2f;
             shapes.setColor(lit(object, state) ? LIT_COLOR : OBJECT_COLORS[i % OBJECT_COLORS.length]);
             shapes.rect(shapeX, shapeY, shapeSize, shapeSize);
@@ -60,7 +63,7 @@ public class RoomRenderer {
         font.draw(batch, layout, (screenWidth - layout.width) / 2f, screenHeight - 28f);
 
         for (int i = 0; i < objectCount; i++) {
-            ObjectDefinition object = room.getObjects().get(i);
+            ObjectDefinition object = objects.get(i);
             String label = object.displayName();
             if (lit(object, state)) {
                 label = label + " (lit)";
@@ -76,6 +79,16 @@ public class RoomRenderer {
         font.draw(batch, "room: " + room.id(), 12f, 36f);
         font.draw(batch, "objects: " + objectCount, 12f, 16f);
         batch.end();
+    }
+
+    private static List<ObjectDefinition> visibleObjects(RoomDefinition room, GameState state) {
+        if (room == null) {
+            return List.of();
+        }
+        if (state == null) {
+            return room.getObjects() == null ? List.of() : room.getObjects();
+        }
+        return state.visibleObjects(room);
     }
 
     private static boolean lit(ObjectDefinition object, GameState state) {

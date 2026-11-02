@@ -70,7 +70,7 @@ class ObjectInteractionTest {
         assertTrue(resolver.availableActions(state, rooms, "brazier").isEmpty());
         assertTrue(resolver.availableActions(state, rooms, "missing").isEmpty());
         assertTrue(resolver.availableActions(state, rooms, " ").isEmpty());
-        assertTrue(resolver.availableActions(state, rooms, null).isEmpty());
+        assertTrue(resolver.availableActions(state, rooms, (String) null).isEmpty());
         assertTrue(resolver.availableActions(null, rooms, "arch").isEmpty());
     }
 

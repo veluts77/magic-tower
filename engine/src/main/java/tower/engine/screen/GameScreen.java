@@ -11,6 +11,7 @@ import tower.domain.action.GameAction;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.SpellDefinition;
+import tower.domain.data.SpiritDefinition;
 import tower.domain.logic.ActionExecutor;
 import tower.domain.logic.ActionResolver;
 import tower.domain.state.GameState;
@@ -35,6 +36,7 @@ public class GameScreen implements Screen {
 
     private final List<RoomDefinition> rooms;
     private final List<SpellDefinition> spells;
+    private final List<SpiritDefinition> spirits;
     private final GameState state;
     private final ActionResolver resolver = new ActionResolver();
     private final ActionExecutor executor = new ActionExecutor();
@@ -47,13 +49,15 @@ public class GameScreen implements Screen {
     private String message = "";
     private Mode mode = Mode.ROOM;
 
-    public GameScreen(GameState state, List<RoomDefinition> rooms, List<SpellDefinition> spells) {
+    public GameScreen(
+            GameState state, List<RoomDefinition> rooms, List<SpellDefinition> spells, List<SpiritDefinition> spirits) {
         if (state == null) {
             throw new IllegalArgumentException("Game state is missing");
         }
         this.state = state;
         this.rooms = rooms == null ? List.of() : List.copyOf(rooms);
         this.spells = spells == null ? List.of() : List.copyOf(spells);
+        this.spirits = spirits == null ? List.of() : List.copyOf(spirits);
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
@@ -138,23 +142,23 @@ public class GameScreen implements Screen {
     }
 
     private void chooseRoomAction() {
-        List<GameAction> actions = resolver.availableActions(state, rooms);
+        List<GameAction> actions = resolver.availableActions(state, rooms, spirits);
         int index = selectedIndex(actions.size());
         if (index == NONE) {
             return;
         }
         GameAction action = index == UNAVAILABLE ? UNAVAILABLE_ACTION : actions.get(index);
-        message = text(executor.execute(state, rooms, action, spells));
+        message = text(executor.execute(state, rooms, action, spells, spirits));
     }
 
     private void chooseObject() {
-        List<ObjectDefinition> objects = currentRoom().getObjects();
+        List<ObjectDefinition> objects = visibleObjects();
         int index = selectedIndex(objects.size());
         if (index == NONE) {
             return;
         }
         if (index == UNAVAILABLE) {
-            message = text(executor.execute(state, rooms, UNAVAILABLE_ACTION, spells));
+            message = text(executor.execute(state, rooms, UNAVAILABLE_ACTION, spells, spirits));
             return;
         }
         state.selectObject(objects.get(index).id());
@@ -168,7 +172,7 @@ public class GameScreen implements Screen {
             return;
         }
         GameAction action = index == UNAVAILABLE ? UNAVAILABLE_ACTION : actions.get(index);
-        message = text(executor.execute(state, rooms, action, spells));
+        message = text(executor.execute(state, rooms, action, spells, spirits));
         if (index != UNAVAILABLE) {
             leaveObject();
         }
@@ -185,8 +189,8 @@ public class GameScreen implements Screen {
 
     private List<String> lines() {
         return switch (mode) {
-            case ROOM -> labels(resolver.availableActions(state, rooms));
-            case SELECT_OBJECT -> objectLabels(currentRoom().getObjects());
+            case ROOM -> labels(resolver.availableActions(state, rooms, spirits));
+            case SELECT_OBJECT -> objectLabels(visibleObjects());
             case OBJECT_ACTIONS -> labels(objectActions());
         };
     }
@@ -205,7 +209,7 @@ public class GameScreen implements Screen {
 
     private String selectedName() {
         String selectedId = state.selectedObjectId();
-        for (ObjectDefinition object : currentRoom().getObjects()) {
+        for (ObjectDefinition object : visibleObjects()) {
             if (object.id().equals(selectedId)) {
                 return objectName(object);
             }
@@ -241,6 +245,10 @@ public class GameScreen implements Screen {
             return name + " (lit)";
         }
         return name;
+    }
+
+    private List<ObjectDefinition> visibleObjects() {
+        return state.visibleObjects(currentRoom());
     }
 
     private RoomDefinition currentRoom() {

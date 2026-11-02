@@ -5,6 +5,7 @@ import tower.domain.action.GameAction;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.SpellDefinition;
+import tower.domain.data.SpiritDefinition;
 import tower.domain.state.GameState;
 
 import java.util.ArrayList;
@@ -13,8 +14,12 @@ import java.util.Objects;
 
 import static tower.domain.action.ActionResult.Change.CURRENT_ROOM;
 import static tower.domain.action.ActionResult.Change.OBJECT_CONDITION;
+import static tower.domain.action.ActionResult.Change.REVEALED_OBJECTS;
+import static tower.domain.action.ActionResult.Change.SPIRIT_SUMMONED;
 import static tower.domain.action.ActionResult.Change.VISITED_ROOMS;
 import static tower.domain.action.ActionType.MOVE;
+import static tower.domain.action.ActionType.SUMMON;
+import static tower.domain.data.SpiritFunction.SEEK;
 import static tower.domain.state.RoomState.LIT;
 
 public class ActionExecutor {
@@ -29,19 +34,30 @@ public class ActionExecutor {
 
     public ActionResult execute(
             GameState state, List<RoomDefinition> rooms, GameAction action, List<SpellDefinition> spells) {
+        return execute(state, rooms, action, spells, List.of());
+    }
+
+    public ActionResult execute(
+            GameState state,
+            List<RoomDefinition> rooms,
+            GameAction action,
+            List<SpellDefinition> spells,
+            List<SpiritDefinition> spirits) {
         if (state == null || action == null || action.type == null) {
             return ActionResult.rejected("That action is not available.");
         }
         List<SpellDefinition> knownSpells = spells == null ? List.of() : spells;
+        List<SpiritDefinition> knownSpirits = spirits == null ? List.of() : spirits;
         return switch (action.type) {
             case EXAMINE -> examine(state, rooms, action);
             case CAST -> cast(state, rooms, action, knownSpells);
-            case LOOK, MOVE -> roomAction(state, rooms, action);
+            case LOOK, MOVE, SUMMON -> roomAction(state, rooms, action, knownSpirits);
         };
     }
 
-    private ActionResult roomAction(GameState state, List<RoomDefinition> rooms, GameAction action) {
-        GameAction available = match(resolver.availableActions(state, rooms), action);
+    private ActionResult roomAction(
+            GameState state, List<RoomDefinition> rooms, GameAction action, List<SpiritDefinition> spirits) {
+        GameAction available = match(resolver.availableActions(state, rooms, spirits), action);
         if (available == null) {
             var message = action.type == MOVE
                     ? "That room is not connected."
@@ -50,6 +66,9 @@ public class ActionExecutor {
         }
         if (available.type == MOVE) {
             return move(state, rooms, available);
+        }
+        if (available.type == SUMMON) {
+            return summon(state, rooms, available, spirits);
         }
         return look(state, rooms);
     }
@@ -107,10 +126,51 @@ public class ActionExecutor {
         return ActionResult.succeeded(message, changes.toArray(ActionResult.Change[]::new));
     }
 
+    private ActionResult summon(
+            GameState state, List<RoomDefinition> rooms, GameAction action, List<SpiritDefinition> spirits) {
+        SpiritDefinition spirit = findSpirit(spirits, action.target);
+        if (spirit == null || spirit.function() != SEEK) {
+            return ActionResult.rejected("That action is not available.");
+        }
+        state.summonSpirit(spirit.id());
+        String spiritName = spirit.displayName().isBlank() ? spirit.id() : spirit.displayName();
+        RoomDefinition room = Rooms.find(rooms, state.currentRoomId());
+        var found = new ArrayList<String>();
+        for (String hiddenId : room.hiddenObjects()) {
+            if (state.isObjectVisible(room, hiddenId)) {
+                continue;
+            }
+            ObjectDefinition object = Rooms.findObject(rooms, state.currentRoomId(), hiddenId);
+            if (object == null) {
+                continue;
+            }
+            state.revealObject(hiddenId);
+            found.add(object.displayName().isBlank() ? object.id() : object.displayName());
+        }
+        String message = found.isEmpty()
+                ? spiritName + " searches the room and finds nothing hidden."
+                : spiritName + " uncovers " + String.join(", ", found) + ".";
+        var changes = new ArrayList<ActionResult.Change>();
+        changes.add(SPIRIT_SUMMONED);
+        if (!found.isEmpty()) {
+            changes.add(REVEALED_OBJECTS);
+        }
+        return ActionResult.succeeded(message, changes.toArray(ActionResult.Change[]::new));
+    }
+
     private static SpellDefinition findSpell(List<SpellDefinition> spells, String spellId) {
         for (SpellDefinition spell : spells) {
             if (spell != null && spell.id().equals(spellId)) {
                 return spell;
+            }
+        }
+        return null;
+    }
+
+    private static SpiritDefinition findSpirit(List<SpiritDefinition> spirits, String spiritId) {
+        for (SpiritDefinition spirit : spirits) {
+            if (spirit != null && spirit.id().equals(spiritId)) {
+                return spirit;
             }
         }
         return null;

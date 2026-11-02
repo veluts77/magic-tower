@@ -9,6 +9,7 @@ public class RoomDefinition {
     private String displayName;
     private String description;
     private List<ObjectDefinition> objects = new ArrayList<>();
+    private List<String> hiddenObjects = new ArrayList<>();
     private List<RoomExit> exits = new ArrayList<>();
 
     public static RoomDefinition create(String id, String displayName, String description) {
@@ -31,6 +32,29 @@ public class RoomDefinition {
 
     public void setObjects(List<ObjectDefinition> objects) {
         this.objects = objects;
+    }
+
+    public List<String> hiddenObjects() {
+        if (hiddenObjects == null) {
+            hiddenObjects = new ArrayList<>();
+        }
+        return hiddenObjects;
+    }
+
+    public void setHiddenObjects(List<String> hiddenObjects) {
+        this.hiddenObjects = new ArrayList<>();
+        if (hiddenObjects == null) {
+            return;
+        }
+        for (String objectId : hiddenObjects) {
+            if (objectId != null && !objectId.isBlank()) {
+                this.hiddenObjects.add(objectId);
+            }
+        }
+    }
+
+    public boolean hides(String objectId) {
+        return objectId != null && hiddenObjects().contains(objectId);
     }
 
     public List<RoomExit> getExits() {

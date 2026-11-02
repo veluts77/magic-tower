@@ -6,6 +6,7 @@
       "id": "entrance",
       "displayName": "Entrance",
       "description": "A worn stone arch leads into the tower. Dust hangs in the still air.",
+      "hiddenObjects": ["sigil"],
       "exits": [
         {
           "targetRoomId": "hall",
@@ -18,6 +19,12 @@
           "displayName": "Stone Arch",
           "type": "passage",
           "description": "The stones are worn smooth. Faint marks cover the inner curve."
+        },
+        {
+          "id": "sigil",
+          "displayName": "Worn Sigil",
+          "type": "clue",
+          "description": "A small stone sigil, easy to miss in the dust. The carving is a tight spiral."
         }
       ]
     },

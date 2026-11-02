@@ -5,17 +5,24 @@ import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.RoomExit;
 import tower.domain.data.SpellDefinition;
+import tower.domain.data.SpiritDefinition;
 import tower.domain.state.GameState;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import static tower.domain.data.SpiritFunction.SEEK;
 import static tower.domain.data.SpellTarget.OBJECT;
 
 public class ActionResolver {
 
     public List<GameAction> availableActions(GameState state, List<RoomDefinition> rooms) {
+        return availableActions(state, rooms, List.of());
+    }
+
+    public List<GameAction> availableActions(
+            GameState state, List<RoomDefinition> rooms, List<SpiritDefinition> spirits) {
         if (state == null) {
             return List.of();
         }
@@ -23,6 +30,7 @@ public class ActionResolver {
         var actions = new ArrayList<GameAction>();
         actions.add(GameAction.look());
         addMoveActions(actions, room, rooms);
+        addSummonActions(actions, state, spirits);
         return List.copyOf(actions);
     }
 
@@ -37,6 +45,10 @@ public class ActionResolver {
         }
         ObjectDefinition object = Rooms.findObject(rooms, state.currentRoomId(), objectId);
         if (object == null) {
+            return List.of();
+        }
+        RoomDefinition room = Rooms.find(rooms, state.currentRoomId());
+        if (!state.isObjectVisible(room, object.id())) {
             return List.of();
         }
         String name = object.displayName().isBlank() ? objectId : object.displayName();
@@ -65,6 +77,28 @@ public class ActionResolver {
             }
             String name = spell.displayName().isBlank() ? spellId : spell.displayName();
             actions.add(GameAction.cast(spellId, "Cast: " + name));
+        }
+    }
+
+    private static void addSummonActions(
+            List<GameAction> actions, GameState state, List<SpiritDefinition> spirits) {
+        if (spirits == null) {
+            return;
+        }
+        var seen = new LinkedHashSet<String>();
+        for (SpiritDefinition spirit : spirits) {
+            if (spirit == null || spirit.function() != SEEK) {
+                continue;
+            }
+            String spiritId = spirit.id();
+            if (spiritId.isBlank() || !seen.add(spiritId)) {
+                continue;
+            }
+            if (!state.player().knowsSpirit(spiritId) || state.spiritSummoned(spiritId)) {
+                continue;
+            }
+            String name = spirit.displayName().isBlank() ? spiritId : spirit.displayName();
+            actions.add(GameAction.summon(spiritId, "Summon: " + name));
         }
     }
 

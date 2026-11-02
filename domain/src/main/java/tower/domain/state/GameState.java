@@ -1,10 +1,14 @@
 package tower.domain.state;
 
 import tower.domain.data.FloorDefinition;
+import tower.domain.data.ObjectDefinition;
+import tower.domain.data.RoomDefinition;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -77,6 +81,41 @@ public class GameState {
 
     public void setObjectCondition(String objectId, String condition) {
         roomState(currentRoomId).setObjectCondition(objectId, condition);
+    }
+
+    public boolean spiritSummoned(String spiritId) {
+        return roomState(currentRoomId).spiritSummoned(spiritId);
+    }
+
+    public void summonSpirit(String spiritId) {
+        roomState(currentRoomId).markSpiritSummoned(spiritId);
+    }
+
+    public void revealObject(String objectId) {
+        roomState(currentRoomId).revealObject(objectId);
+    }
+
+    public boolean isObjectVisible(RoomDefinition room, String objectId) {
+        if (room == null || objectId == null || objectId.isBlank()) {
+            return false;
+        }
+        if (!room.hides(objectId)) {
+            return true;
+        }
+        return roomState(room.id()).objectRevealed(objectId);
+    }
+
+    public List<ObjectDefinition> visibleObjects(RoomDefinition room) {
+        if (room == null || room.getObjects() == null) {
+            return List.of();
+        }
+        var visible = new ArrayList<ObjectDefinition>();
+        for (ObjectDefinition object : room.getObjects()) {
+            if (object != null && isObjectVisible(room, object.id())) {
+                visible.add(object);
+            }
+        }
+        return List.copyOf(visible);
     }
 
     private RoomState roomState(String roomId) {

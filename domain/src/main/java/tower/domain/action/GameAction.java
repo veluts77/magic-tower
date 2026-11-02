@@ -4,6 +4,7 @@ import static tower.domain.action.ActionType.CAST;
 import static tower.domain.action.ActionType.EXAMINE;
 import static tower.domain.action.ActionType.LOOK;
 import static tower.domain.action.ActionType.MOVE;
+import static tower.domain.action.ActionType.SUMMON;
 
 public class GameAction {
 
@@ -33,5 +34,9 @@ public class GameAction {
 
     public static GameAction cast(String spellId, String label) {
         return new GameAction("cast:" + spellId, CAST, spellId, label);
+    }
+
+    public static GameAction summon(String spiritId, String label) {
+        return new GameAction("summon:" + spiritId, SUMMON, spiritId, label);
     }
 }

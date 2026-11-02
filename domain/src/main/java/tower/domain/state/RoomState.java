@@ -1,13 +1,17 @@
 package tower.domain.state;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class RoomState {
 
     public static final String LIT = "lit";
 
     private final Map<String, String> objectConditions = new LinkedHashMap<>();
+    private final Set<String> summonedSpiritIds = new LinkedHashSet<>();
+    private final Set<String> revealedObjectIds = new LinkedHashSet<>();
 
     public String objectCondition(String objectId) {
         if (objectId == null) {
@@ -25,5 +29,27 @@ public class RoomState {
             throw new IllegalArgumentException("Object condition is missing");
         }
         objectConditions.put(objectId, condition);
+    }
+
+    public boolean spiritSummoned(String spiritId) {
+        return spiritId != null && summonedSpiritIds.contains(spiritId);
+    }
+
+    public void markSpiritSummoned(String spiritId) {
+        if (spiritId == null || spiritId.isBlank()) {
+            throw new IllegalArgumentException("Spirit id is missing");
+        }
+        summonedSpiritIds.add(spiritId);
+    }
+
+    public boolean objectRevealed(String objectId) {
+        return objectId != null && revealedObjectIds.contains(objectId);
+    }
+
+    public void revealObject(String objectId) {
+        if (objectId == null || objectId.isBlank()) {
+            throw new IllegalArgumentException("Object id is missing");
+        }
+        revealedObjectIds.add(objectId);
     }
 }
