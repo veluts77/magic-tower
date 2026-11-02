@@ -27,6 +27,7 @@ public class ActionResult {
         VISITED_ROOMS,
         OBJECT_CONDITION,
         SPIRIT_SUMMONED,
-        REVEALED_OBJECTS
+        REVEALED_OBJECTS,
+        ARTIFACT_EQUIPPED
     }
 }

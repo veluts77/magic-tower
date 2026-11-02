@@ -1,5 +1,6 @@
 package tower.domain.service;
 
+import tower.domain.data.ArtifactDefinition;
 import tower.domain.data.FloorDefinition;
 import tower.domain.data.SpellDefinition;
 import tower.domain.data.SpiritDefinition;
@@ -13,4 +14,6 @@ public interface DataLoader {
     List<SpellDefinition> loadSpells();
 
     List<SpiritDefinition> loadSpirits();
+
+    List<ArtifactDefinition> loadArtifacts();
 }

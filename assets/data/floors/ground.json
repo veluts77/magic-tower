@@ -31,7 +31,7 @@
     {
       "id": "hall",
       "displayName": "Quiet Hall",
-      "description": "A long hall is quiet. A cold brazier and a faded inscription wait in the dim light.",
+      "description": "A long hall is quiet. A cold brazier, a faded inscription, and a cool ring wait in the dim light.",
       "exits": [
         {
           "targetRoomId": "entrance",
@@ -40,6 +40,10 @@
         {
           "targetRoomId": "alcove",
           "label": "Go to the Side Alcove"
+        },
+        {
+          "targetRoomId": "veil",
+          "label": "Go to the Flame Veil"
         }
       ],
       "objects": [
@@ -55,6 +59,13 @@
           "displayName": "Faded Inscription",
           "type": "clue",
           "description": "The letters have faded. A few words still speak of a quiet flame."
+        },
+        {
+          "id": "ring",
+          "displayName": "Ring of Quiet Flame",
+          "type": "artifact",
+          "description": "A thin metal ring, cool to the touch. A quiet flame sleeps inside the band.",
+          "artifact": "ring_of_quiet_flame"
         }
       ]
     },
@@ -76,6 +87,19 @@
           "description": "The pedestal is empty. A round hollow marks where something once stood."
         }
       ]
+    },
+    {
+      "id": "veil",
+      "displayName": "Flame Veil",
+      "description": "A curtain of quiet fire fills the arch. The heat does not roar. It simply refuses passage.",
+      "hazard": "fire",
+      "exits": [
+        {
+          "targetRoomId": "hall",
+          "label": "Go to the Quiet Hall"
+        }
+      ],
+      "objects": []
     }
   ]
 }

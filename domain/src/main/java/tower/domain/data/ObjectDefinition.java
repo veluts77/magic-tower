@@ -9,6 +9,7 @@ public class ObjectDefinition {
     private String displayName;
     private String type;
     private String description;
+    private String artifactId;
     private List<String> supportedSpells = new ArrayList<>();
 
     public static ObjectDefinition create(String id, String displayName, String type, String description) {
@@ -59,5 +60,21 @@ public class ObjectDefinition {
 
     public boolean supportsSpell(String spellId) {
         return spellId != null && supportedSpells().contains(spellId);
+    }
+
+    public String artifactId() {
+        return artifactId;
+    }
+
+    public void setArtifactId(String artifactId) {
+        if (artifactId == null || artifactId.isBlank()) {
+            this.artifactId = null;
+            return;
+        }
+        this.artifactId = artifactId;
+    }
+
+    public boolean isArtifact() {
+        return artifactId != null;
     }
 }

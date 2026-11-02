@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import tower.domain.action.ActionResult;
 import tower.domain.action.GameAction;
+import tower.domain.data.ArtifactDefinition;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.SpellDefinition;
@@ -37,6 +38,7 @@ public class GameScreen implements Screen {
     private final List<RoomDefinition> rooms;
     private final List<SpellDefinition> spells;
     private final List<SpiritDefinition> spirits;
+    private final List<ArtifactDefinition> artifacts;
     private final GameState state;
     private final ActionResolver resolver = new ActionResolver();
     private final ActionExecutor executor = new ActionExecutor();
@@ -50,7 +52,11 @@ public class GameScreen implements Screen {
     private Mode mode = Mode.ROOM;
 
     public GameScreen(
-            GameState state, List<RoomDefinition> rooms, List<SpellDefinition> spells, List<SpiritDefinition> spirits) {
+            GameState state,
+            List<RoomDefinition> rooms,
+            List<SpellDefinition> spells,
+            List<SpiritDefinition> spirits,
+            List<ArtifactDefinition> artifacts) {
         if (state == null) {
             throw new IllegalArgumentException("Game state is missing");
         }
@@ -58,6 +64,7 @@ public class GameScreen implements Screen {
         this.rooms = rooms == null ? List.of() : List.copyOf(rooms);
         this.spells = spells == null ? List.of() : List.copyOf(spells);
         this.spirits = spirits == null ? List.of() : List.copyOf(spirits);
+        this.artifacts = artifacts == null ? List.of() : List.copyOf(artifacts);
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
@@ -148,7 +155,7 @@ public class GameScreen implements Screen {
             return;
         }
         GameAction action = index == UNAVAILABLE ? UNAVAILABLE_ACTION : actions.get(index);
-        message = text(executor.execute(state, rooms, action, spells, spirits));
+        message = text(run(action));
     }
 
     private void chooseObject() {
@@ -158,7 +165,7 @@ public class GameScreen implements Screen {
             return;
         }
         if (index == UNAVAILABLE) {
-            message = text(executor.execute(state, rooms, UNAVAILABLE_ACTION, spells, spirits));
+            message = text(run(UNAVAILABLE_ACTION));
             return;
         }
         state.selectObject(objects.get(index).id());
@@ -172,7 +179,7 @@ public class GameScreen implements Screen {
             return;
         }
         GameAction action = index == UNAVAILABLE ? UNAVAILABLE_ACTION : actions.get(index);
-        message = text(executor.execute(state, rooms, action, spells, spirits));
+        message = text(run(action));
         if (index != UNAVAILABLE) {
             leaveObject();
         }
@@ -181,6 +188,10 @@ public class GameScreen implements Screen {
     private void leaveObject() {
         state.clearSelection();
         mode = Mode.ROOM;
+    }
+
+    private ActionResult run(GameAction action) {
+        return executor.execute(state, rooms, action, spells, spirits, artifacts);
     }
 
     private static String text(ActionResult result) {

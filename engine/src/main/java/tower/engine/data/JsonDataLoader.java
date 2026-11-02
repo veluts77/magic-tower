@@ -4,10 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import tower.domain.data.ArtifactDefinition;
+import tower.domain.data.ArtifactEffect;
 import tower.domain.data.FloorDefinition;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.RoomExit;
+import tower.domain.data.RoomHazard;
 import tower.domain.data.SpellDefinition;
 import tower.domain.data.SpellTarget;
 import tower.domain.data.SpiritDefinition;
@@ -19,6 +22,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import static java.util.Locale.ROOT;
+import static tower.domain.data.ArtifactEffect.FIRE_PROTECTION;
+import static tower.domain.data.RoomHazard.FIRE;
 import static tower.domain.data.SpellTarget.CREATURE;
 import static tower.domain.data.SpellTarget.OBJECT;
 import static tower.domain.data.SpellTarget.ROOM;
@@ -106,6 +111,24 @@ public class JsonDataLoader implements DataLoader {
         return List.copyOf(spirits);
     }
 
+    @Override
+    public List<ArtifactDefinition> loadArtifacts() {
+        FileHandle directory = Gdx.files.internal("data/artifacts");
+        if (!directory.exists() || !directory.isDirectory()) {
+            Gdx.app.error("JsonDataLoader", "Artifacts directory not found: " + directory.path());
+            throw new IllegalArgumentException("Artifacts directory not found");
+        }
+        FileHandle[] files = directory.list(".json");
+        var artifacts = new ArrayList<ArtifactDefinition>();
+        if (files != null) {
+            for (FileHandle file : files) {
+                artifacts.add(readArtifact(file));
+            }
+        }
+        artifacts.sort(Comparator.comparing(ArtifactDefinition::id));
+        return List.copyOf(artifacts);
+    }
+
     private static SpellDefinition readSpell(FileHandle file) {
         if (file == null || !file.exists()) {
             throw new IllegalArgumentException("Spell file not found");
@@ -138,6 +161,22 @@ public class JsonDataLoader implements DataLoader {
         return spirit;
     }
 
+    private static ArtifactDefinition readArtifact(FileHandle file) {
+        if (file == null || !file.exists()) {
+            throw new IllegalArgumentException("Artifact file not found");
+        }
+        JsonValue root = new JsonReader().parse(file);
+        var artifact = ArtifactDefinition.create(
+                text(root, "id"),
+                text(root, "displayName"),
+                text(root, "description"),
+                artifactEffect(root));
+        if (artifact.id().isBlank()) {
+            throw new IllegalArgumentException("Artifact id is missing: " + file.path());
+        }
+        return artifact;
+    }
+
     private static List<RoomDefinition> readRooms(JsonValue roomsJson) {
         var rooms = new ArrayList<RoomDefinition>();
         if (roomsJson == null) {
@@ -151,6 +190,7 @@ public class JsonDataLoader implements DataLoader {
             room.setObjects(readObjects(roomJson.get("objects")));
             room.setHiddenObjects(readIds(roomJson.get("hiddenObjects")));
             room.setExits(readExits(roomJson.get("exits")));
+            room.setHazard(roomHazard(roomJson));
             rooms.add(room);
         }
         return rooms;
@@ -168,6 +208,7 @@ public class JsonDataLoader implements DataLoader {
                     text(objectJson, "type"),
                     text(objectJson, "description"));
             object.setSupportedSpells(readIds(objectJson.get("supportedSpells")));
+            object.setArtifactId(text(objectJson, "artifact"));
             objects.add(object);
         }
         return objects;
@@ -208,6 +249,28 @@ public class JsonDataLoader implements DataLoader {
             case "room" -> ROOM;
             case "creature" -> CREATURE;
             default -> throw new IllegalArgumentException("Unknown spell target: " + value);
+        };
+    }
+
+    private static ArtifactEffect artifactEffect(JsonValue node) {
+        String value = text(node, "effect");
+        if (value.isBlank()) {
+            return FIRE_PROTECTION;
+        }
+        return switch (value.toLowerCase(ROOT)) {
+            case "fire_protection" -> FIRE_PROTECTION;
+            default -> throw new IllegalArgumentException("Unknown artifact effect: " + value);
+        };
+    }
+
+    private static RoomHazard roomHazard(JsonValue roomJson) {
+        String value = text(roomJson, "hazard");
+        if (value.isBlank()) {
+            return null;
+        }
+        return switch (value.toLowerCase(ROOT)) {
+            case "fire" -> FIRE;
+            default -> throw new IllegalArgumentException("Unknown room hazard: " + value);
         };
     }
 

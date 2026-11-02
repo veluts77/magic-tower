@@ -12,6 +12,7 @@ public class RoomState {
     private final Map<String, String> objectConditions = new LinkedHashMap<>();
     private final Set<String> summonedSpiritIds = new LinkedHashSet<>();
     private final Set<String> revealedObjectIds = new LinkedHashSet<>();
+    private final Set<String> takenObjectIds = new LinkedHashSet<>();
 
     public String objectCondition(String objectId) {
         if (objectId == null) {
@@ -51,5 +52,16 @@ public class RoomState {
             throw new IllegalArgumentException("Object id is missing");
         }
         revealedObjectIds.add(objectId);
+    }
+
+    public boolean objectTaken(String objectId) {
+        return objectId != null && takenObjectIds.contains(objectId);
+    }
+
+    public void markObjectTaken(String objectId) {
+        if (objectId == null || objectId.isBlank()) {
+            throw new IllegalArgumentException("Object id is missing");
+        }
+        takenObjectIds.add(objectId);
     }
 }

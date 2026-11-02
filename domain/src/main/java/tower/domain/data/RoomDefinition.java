@@ -11,6 +11,7 @@ public class RoomDefinition {
     private List<ObjectDefinition> objects = new ArrayList<>();
     private List<String> hiddenObjects = new ArrayList<>();
     private List<RoomExit> exits = new ArrayList<>();
+    private RoomHazard hazard;
 
     public static RoomDefinition create(String id, String displayName, String description) {
         return new RoomDefinition(id, displayName, description);
@@ -55,6 +56,14 @@ public class RoomDefinition {
 
     public boolean hides(String objectId) {
         return objectId != null && hiddenObjects().contains(objectId);
+    }
+
+    public RoomHazard hazard() {
+        return hazard;
+    }
+
+    public void setHazard(RoomHazard hazard) {
+        this.hazard = hazard;
     }
 
     public List<RoomExit> getExits() {

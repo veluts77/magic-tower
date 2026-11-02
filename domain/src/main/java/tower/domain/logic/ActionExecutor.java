@@ -2,8 +2,10 @@ package tower.domain.logic;
 
 import tower.domain.action.ActionResult;
 import tower.domain.action.GameAction;
+import tower.domain.data.ArtifactDefinition;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
+import tower.domain.data.RoomHazard;
 import tower.domain.data.SpellDefinition;
 import tower.domain.data.SpiritDefinition;
 import tower.domain.state.GameState;
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static tower.domain.action.ActionResult.Change.ARTIFACT_EQUIPPED;
 import static tower.domain.action.ActionResult.Change.CURRENT_ROOM;
 import static tower.domain.action.ActionResult.Change.OBJECT_CONDITION;
 import static tower.domain.action.ActionResult.Change.REVEALED_OBJECTS;
@@ -43,14 +46,26 @@ public class ActionExecutor {
             GameAction action,
             List<SpellDefinition> spells,
             List<SpiritDefinition> spirits) {
+        return execute(state, rooms, action, spells, spirits, List.of());
+    }
+
+    public ActionResult execute(
+            GameState state,
+            List<RoomDefinition> rooms,
+            GameAction action,
+            List<SpellDefinition> spells,
+            List<SpiritDefinition> spirits,
+            List<ArtifactDefinition> artifacts) {
         if (state == null || action == null || action.type == null) {
             return ActionResult.rejected("That action is not available.");
         }
         List<SpellDefinition> knownSpells = spells == null ? List.of() : spells;
         List<SpiritDefinition> knownSpirits = spirits == null ? List.of() : spirits;
+        List<ArtifactDefinition> knownArtifacts = artifacts == null ? List.of() : artifacts;
         return switch (action.type) {
             case EXAMINE -> examine(state, rooms, action);
             case CAST -> cast(state, rooms, action, knownSpells);
+            case TAKE -> take(state, rooms, action, knownArtifacts);
             case LOOK, MOVE, SUMMON -> roomAction(state, rooms, action, knownSpirits);
         };
     }
@@ -176,6 +191,40 @@ public class ActionExecutor {
         return null;
     }
 
+    private ActionResult take(
+            GameState state, List<RoomDefinition> rooms, GameAction action, List<ArtifactDefinition> artifacts) {
+        ObjectDefinition object = Rooms.findObject(rooms, state.currentRoomId(), action.target);
+        if (object == null || !object.isArtifact()) {
+            return ActionResult.rejected("That action is not available.");
+        }
+        RoomDefinition room = Rooms.find(rooms, state.currentRoomId());
+        if (!state.isObjectVisible(room, object.id()) || state.player().isEquipped(object.artifactId())) {
+            return ActionResult.rejected("That action is not available.");
+        }
+        if (!state.player().hasFreeEquipmentSlot()) {
+            return ActionResult.rejected("There are no free slots.");
+        }
+        ArtifactDefinition artifact = findArtifact(artifacts, object.artifactId());
+        if (artifact == null || artifact.id().isBlank() || artifact.effect() == null) {
+            return ActionResult.rejected("That action is not available.");
+        }
+        if (!state.player().equipArtifact(artifact.id(), artifact.effect())) {
+            return ActionResult.rejected("There are no free slots.");
+        }
+        state.takeObject(object.id());
+        String name = artifact.displayName().isBlank() ? artifact.id() : artifact.displayName();
+        return ActionResult.succeeded("You take " + name + ".", ARTIFACT_EQUIPPED);
+    }
+
+    private static ArtifactDefinition findArtifact(List<ArtifactDefinition> artifacts, String artifactId) {
+        for (ArtifactDefinition artifact : artifacts) {
+            if (artifact != null && artifact.id().equals(artifactId)) {
+                return artifact;
+            }
+        }
+        return null;
+    }
+
     private static ActionResult look(GameState state, List<RoomDefinition> rooms) {
         RoomDefinition room = Rooms.find(rooms, state.currentRoomId());
         String message = room == null ? "" : room.description();
@@ -184,11 +233,14 @@ public class ActionExecutor {
 
     private static ActionResult move(GameState state, List<RoomDefinition> rooms, GameAction action) {
         String targetRoomId = action.target;
+        RoomDefinition destination = Rooms.find(rooms, targetRoomId);
+        RoomHazard hazard = destination.hazard();
+        if (hazard != null && !state.player().hasEffect(hazard.requiredProtection())) {
+            return ActionResult.rejected(hazard.blockedMessage());
+        }
         boolean roomChanged = !targetRoomId.equals(state.currentRoomId());
         boolean newlyVisited = !state.visitedRoomIds().contains(targetRoomId);
         state.enterRoom(targetRoomId);
-
-        RoomDefinition destination = Rooms.find(rooms, targetRoomId);
         String name = destination == null || destination.displayName().isBlank()
                 ? targetRoomId
                 : destination.displayName();

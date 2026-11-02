@@ -54,8 +54,20 @@ public class ActionResolver {
         String name = object.displayName().isBlank() ? objectId : object.displayName();
         var actions = new ArrayList<GameAction>();
         actions.add(GameAction.examine(objectId, "Examine " + name));
+        addTakeAction(actions, state, object);
         addCastActions(actions, state, object, spells);
         return List.copyOf(actions);
+    }
+
+    private static void addTakeAction(List<GameAction> actions, GameState state, ObjectDefinition object) {
+        String artifactId = object.artifactId();
+        if (artifactId == null) {
+            return;
+        }
+        if (state.player().isEquipped(artifactId) || !state.player().hasFreeEquipmentSlot()) {
+            return;
+        }
+        actions.add(GameAction.take(object.id(), "Pick up"));
     }
 
     private static void addCastActions(

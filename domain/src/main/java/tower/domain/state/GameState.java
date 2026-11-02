@@ -99,10 +99,21 @@ public class GameState {
         if (room == null || objectId == null || objectId.isBlank()) {
             return false;
         }
+        if (roomState(room.id()).objectTaken(objectId)) {
+            return false;
+        }
         if (!room.hides(objectId)) {
             return true;
         }
         return roomState(room.id()).objectRevealed(objectId);
+    }
+
+    public boolean objectTaken(String objectId) {
+        return roomState(currentRoomId).objectTaken(objectId);
+    }
+
+    public void takeObject(String objectId) {
+        roomState(currentRoomId).markObjectTaken(objectId);
     }
 
     public List<ObjectDefinition> visibleObjects(RoomDefinition room) {

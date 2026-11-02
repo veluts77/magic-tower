@@ -2,6 +2,7 @@ package tower.engine;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import tower.domain.data.ArtifactDefinition;
 import tower.domain.data.FloorDefinition;
 import tower.domain.data.SpellDefinition;
 import tower.domain.data.SpiritDefinition;
@@ -21,16 +22,18 @@ public class TowerGame extends Game {
         FloorDefinition floor = loader.loadFloor("ground");
         List<SpellDefinition> spells = loader.loadSpells();
         List<SpiritDefinition> spirits = loader.loadSpirits();
+        List<ArtifactDefinition> artifacts = loader.loadArtifacts();
         Gdx.app.log(
                 "TowerGame",
                 "Loaded floor: " + floor.displayName()
                         + ", rooms: " + floor.roomCount()
                         + ", spells: " + spells.size()
-                        + ", spirits: " + spirits.size());
+                        + ", spirits: " + spirits.size()
+                        + ", artifacts: " + artifacts.size());
         var state = GameState.start(floor);
         state.player().learnSpell("spark");
         state.player().learnSpirit("seeker");
-        setScreen(new GameScreen(state, loader.loadedRooms(), spells, spirits));
+        setScreen(new GameScreen(state, loader.loadedRooms(), spells, spirits, artifacts));
     }
 
     @Override

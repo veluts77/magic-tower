@@ -1,0 +1,6 @@
+{
+  "id": "ring_of_quiet_flame",
+  "displayName": "Ring of Quiet Flame",
+  "description": "A thin band that stays cool. Its quiet flame turns a greater fire aside.",
+  "effect": "fire_protection"
+}

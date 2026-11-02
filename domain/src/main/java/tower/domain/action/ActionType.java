@@ -5,5 +5,6 @@ public enum ActionType {
     MOVE,
     EXAMINE,
     CAST,
-    SUMMON
+    SUMMON,
+    TAKE
 }
