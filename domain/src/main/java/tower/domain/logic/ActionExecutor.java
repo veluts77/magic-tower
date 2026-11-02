@@ -3,6 +3,7 @@ package tower.domain.logic;
 import tower.domain.action.ActionResult;
 import tower.domain.action.GameAction;
 import tower.domain.data.ArtifactDefinition;
+import tower.domain.data.CreatureDefinition;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.RoomHazard;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static tower.domain.action.ActionResult.Change.ARTIFACT_EQUIPPED;
+import static tower.domain.action.ActionResult.Change.CREATURE_NEUTRALIZED;
 import static tower.domain.action.ActionResult.Change.CURRENT_ROOM;
 import static tower.domain.action.ActionResult.Change.OBJECT_CONDITION;
 import static tower.domain.action.ActionResult.Change.REVEALED_OBJECTS;
@@ -56,16 +58,28 @@ public class ActionExecutor {
             List<SpellDefinition> spells,
             List<SpiritDefinition> spirits,
             List<ArtifactDefinition> artifacts) {
+        return execute(state, rooms, action, spells, spirits, artifacts, List.of());
+    }
+
+    public ActionResult execute(
+            GameState state,
+            List<RoomDefinition> rooms,
+            GameAction action,
+            List<SpellDefinition> spells,
+            List<SpiritDefinition> spirits,
+            List<ArtifactDefinition> artifacts,
+            List<CreatureDefinition> creatures) {
         if (state == null || action == null || action.type == null) {
             return ActionResult.rejected("That action is not available.");
         }
         List<SpellDefinition> knownSpells = spells == null ? List.of() : spells;
         List<SpiritDefinition> knownSpirits = spirits == null ? List.of() : spirits;
         List<ArtifactDefinition> knownArtifacts = artifacts == null ? List.of() : artifacts;
+        List<CreatureDefinition> knownCreatures = creatures == null ? List.of() : creatures;
         return switch (action.type) {
-            case EXAMINE -> examine(state, rooms, action);
-            case CAST -> cast(state, rooms, action, knownSpells);
-            case TAKE -> take(state, rooms, action, knownArtifacts);
+            case EXAMINE -> examine(state, rooms, action, knownCreatures);
+            case CAST -> cast(state, rooms, action, knownSpells, knownCreatures);
+            case TAKE -> take(state, rooms, action, knownArtifacts, knownCreatures);
             case LOOK, MOVE, SUMMON -> roomAction(state, rooms, action, knownSpirits);
         };
     }
@@ -97,22 +111,46 @@ public class ActionExecutor {
         return null;
     }
 
-    private ActionResult examine(GameState state, List<RoomDefinition> rooms, GameAction action) {
+    private ActionResult examine(
+            GameState state, List<RoomDefinition> rooms, GameAction action, List<CreatureDefinition> creatures) {
         GameAction available = match(resolver.availableActions(state, rooms, action.target), action);
         if (available == null) {
             return ActionResult.rejected("That action is not available.");
         }
         ObjectDefinition object = Rooms.findObject(rooms, state.currentRoomId(), available.target);
-        String message = object == null ? "" : object.description();
+        String message = descriptionOf(object, creatures);
         if (object != null && LIT.equals(state.objectCondition(object.id()))) {
             message = message + " A small flame burns there now.";
         }
         return ActionResult.succeeded(message);
     }
 
-    private ActionResult cast(GameState state, List<RoomDefinition> rooms, GameAction action, List<SpellDefinition> spells) {
+    private static String descriptionOf(ObjectDefinition object, List<CreatureDefinition> creatures) {
+        if (object == null) {
+            return "";
+        }
+        if (object.isCreature()) {
+            CreatureDefinition creature = findCreature(creatures, object.creatureId());
+            if (creature != null && !creature.description().isBlank()) {
+                return creature.description();
+            }
+        }
+        return object.description();
+    }
+
+    private ActionResult cast(
+            GameState state,
+            List<RoomDefinition> rooms,
+            GameAction action,
+            List<SpellDefinition> spells,
+            List<CreatureDefinition> creatures) {
         String objectId = state.selectedObjectId();
-        GameAction available = match(resolver.availableActions(state, rooms, objectId, spells), action);
+        ActionResult blocked = blockedAccess(state, rooms, objectId, creatures);
+        if (blocked != null) {
+            return blocked;
+        }
+        GameAction available = match(
+                resolver.availableActions(state, rooms, objectId, spells, creatures), action);
         if (available == null) {
             return ActionResult.rejected("That action is not available.");
         }
@@ -121,10 +159,44 @@ public class ActionExecutor {
         if (object == null || object.id() == null || object.id().isBlank() || spell == null) {
             return ActionResult.rejected("That action is not available.");
         }
+        if (object.isCreature()) {
+            return neutralize(state, object, spell, creatures);
+        }
         if (!SPARK.equals(spell.id())) {
             return ActionResult.rejected("That spell does nothing here.");
         }
         return light(state, object);
+    }
+
+    private static ActionResult neutralize(
+            GameState state, ObjectDefinition object, SpellDefinition spell, List<CreatureDefinition> creatures) {
+        CreatureDefinition creature = findCreature(creatures, object.creatureId());
+        if (creature == null || !creature.neutralizedBy(spell.id())) {
+            return ActionResult.rejected("That spell does nothing here.");
+        }
+        if (state.creatureNeutralized(creature.id())) {
+            return ActionResult.rejected("That action is not available.");
+        }
+        state.neutralizeCreature(creature.id());
+        String name = creature.displayName().isBlank() ? creature.id() : creature.displayName();
+        return ActionResult.succeeded("The " + name + " retreats. The way is clear.", CREATURE_NEUTRALIZED);
+    }
+
+    private static ActionResult blockedAccess(
+            GameState state, List<RoomDefinition> rooms, String objectId, List<CreatureDefinition> creatures) {
+        ObjectDefinition object = Rooms.findObject(rooms, state.currentRoomId(), objectId);
+        if (object == null || object.blockedByCreature() == null) {
+            return null;
+        }
+        RoomDefinition room = Rooms.find(rooms, state.currentRoomId());
+        if (!state.isObjectVisible(room, object.id()) || state.creatureNeutralized(object.blockedByCreature())) {
+            return null;
+        }
+        CreatureDefinition creature = findCreature(creatures, object.blockedByCreature());
+        String name = creature == null || creature.displayName().isBlank()
+                ? object.blockedByCreature()
+                : creature.displayName();
+        return ActionResult.rejected("The " + name + " blocks access.");
     }
 
     private static ActionResult light(GameState state, ObjectDefinition object) {
@@ -191,8 +263,28 @@ public class ActionExecutor {
         return null;
     }
 
+    private static CreatureDefinition findCreature(List<CreatureDefinition> creatures, String creatureId) {
+        if (creatureId == null) {
+            return null;
+        }
+        for (CreatureDefinition creature : creatures) {
+            if (creature != null && creature.id().equals(creatureId)) {
+                return creature;
+            }
+        }
+        return null;
+    }
+
     private ActionResult take(
-            GameState state, List<RoomDefinition> rooms, GameAction action, List<ArtifactDefinition> artifacts) {
+            GameState state,
+            List<RoomDefinition> rooms,
+            GameAction action,
+            List<ArtifactDefinition> artifacts,
+            List<CreatureDefinition> creatures) {
+        ActionResult blocked = blockedAccess(state, rooms, action.target, creatures);
+        if (blocked != null) {
+            return blocked;
+        }
         ObjectDefinition object = Rooms.findObject(rooms, state.currentRoomId(), action.target);
         if (object == null || !object.isArtifact()) {
             return ActionResult.rejected("That action is not available.");

@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import tower.domain.data.ArtifactDefinition;
 import tower.domain.data.ArtifactEffect;
+import tower.domain.data.CreatureDefinition;
 import tower.domain.data.FloorDefinition;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
@@ -129,6 +130,24 @@ public class JsonDataLoader implements DataLoader {
         return List.copyOf(artifacts);
     }
 
+    @Override
+    public List<CreatureDefinition> loadCreatures() {
+        FileHandle directory = Gdx.files.internal("data/creatures");
+        if (!directory.exists() || !directory.isDirectory()) {
+            Gdx.app.error("JsonDataLoader", "Creatures directory not found: " + directory.path());
+            throw new IllegalArgumentException("Creatures directory not found");
+        }
+        FileHandle[] files = directory.list(".json");
+        var creatures = new ArrayList<CreatureDefinition>();
+        if (files != null) {
+            for (FileHandle file : files) {
+                creatures.add(readCreature(file));
+            }
+        }
+        creatures.sort(Comparator.comparing(CreatureDefinition::id));
+        return List.copyOf(creatures);
+    }
+
     private static SpellDefinition readSpell(FileHandle file) {
         if (file == null || !file.exists()) {
             throw new IllegalArgumentException("Spell file not found");
@@ -177,6 +196,22 @@ public class JsonDataLoader implements DataLoader {
         return artifact;
     }
 
+    private static CreatureDefinition readCreature(FileHandle file) {
+        if (file == null || !file.exists()) {
+            throw new IllegalArgumentException("Creature file not found");
+        }
+        JsonValue root = new JsonReader().parse(file);
+        var creature = CreatureDefinition.create(
+                text(root, "id"),
+                text(root, "displayName"),
+                text(root, "description"),
+                readIds(root.get("neutralizedBy")));
+        if (creature.id().isBlank()) {
+            throw new IllegalArgumentException("Creature id is missing: " + file.path());
+        }
+        return creature;
+    }
+
     private static List<RoomDefinition> readRooms(JsonValue roomsJson) {
         var rooms = new ArrayList<RoomDefinition>();
         if (roomsJson == null) {
@@ -209,6 +244,8 @@ public class JsonDataLoader implements DataLoader {
                     text(objectJson, "description"));
             object.setSupportedSpells(readIds(objectJson.get("supportedSpells")));
             object.setArtifactId(text(objectJson, "artifact"));
+            object.setCreatureId(text(objectJson, "creature"));
+            object.setBlockedByCreature(text(objectJson, "blockedByCreature"));
             objects.add(object);
         }
         return objects;

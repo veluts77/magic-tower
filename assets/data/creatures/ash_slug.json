@@ -1,0 +1,6 @@
+{
+  "id": "ash_slug",
+  "displayName": "Ash Slug",
+  "description": "A slow slug of warm ash. It lies across the chest and will not move.",
+  "neutralizedBy": ["spark"]
+}

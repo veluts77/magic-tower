@@ -72,7 +72,7 @@
     {
       "id": "alcove",
       "displayName": "Side Alcove",
-      "description": "A narrow alcove holds an empty pedestal. The passage back is the only way out.",
+      "description": "A narrow alcove holds an empty pedestal. An ash slug lies across a small chest.",
       "exits": [
         {
           "targetRoomId": "hall",
@@ -85,6 +85,21 @@
           "displayName": "Empty Pedestal",
           "type": "fixture",
           "description": "The pedestal is empty. A round hollow marks where something once stood."
+        },
+        {
+          "id": "slug",
+          "displayName": "Ash Slug",
+          "type": "creature",
+          "description": "A slow slug of warm ash. It lies across the chest and will not move.",
+          "creature": "ash_slug"
+        },
+        {
+          "id": "chest",
+          "displayName": "Ash Chest",
+          "type": "container",
+          "description": "A small chest crusted with ash. The lid stays shut while the slug lies across it.",
+          "blockedByCreature": "ash_slug",
+          "supportedSpells": ["spark"]
         }
       ]
     },

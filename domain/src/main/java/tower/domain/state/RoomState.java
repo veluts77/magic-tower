@@ -13,6 +13,7 @@ public class RoomState {
     private final Set<String> summonedSpiritIds = new LinkedHashSet<>();
     private final Set<String> revealedObjectIds = new LinkedHashSet<>();
     private final Set<String> takenObjectIds = new LinkedHashSet<>();
+    private final Set<String> neutralizedCreatureIds = new LinkedHashSet<>();
 
     public String objectCondition(String objectId) {
         if (objectId == null) {
@@ -63,5 +64,16 @@ public class RoomState {
             throw new IllegalArgumentException("Object id is missing");
         }
         takenObjectIds.add(objectId);
+    }
+
+    public boolean creatureNeutralized(String creatureId) {
+        return creatureId != null && neutralizedCreatureIds.contains(creatureId);
+    }
+
+    public void neutralizeCreature(String creatureId) {
+        if (creatureId == null || creatureId.isBlank()) {
+            throw new IllegalArgumentException("Creature id is missing");
+        }
+        neutralizedCreatureIds.add(creatureId);
     }
 }

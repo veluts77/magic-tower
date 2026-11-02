@@ -116,6 +116,14 @@ public class GameState {
         roomState(currentRoomId).markObjectTaken(objectId);
     }
 
+    public boolean creatureNeutralized(String creatureId) {
+        return roomState(currentRoomId).creatureNeutralized(creatureId);
+    }
+
+    public void neutralizeCreature(String creatureId) {
+        roomState(currentRoomId).neutralizeCreature(creatureId);
+    }
+
     public List<ObjectDefinition> visibleObjects(RoomDefinition room) {
         if (room == null || room.getObjects() == null) {
             return List.of();

@@ -10,6 +10,8 @@ public class ObjectDefinition {
     private String type;
     private String description;
     private String artifactId;
+    private String creatureId;
+    private String blockedByCreatureId;
     private List<String> supportedSpells = new ArrayList<>();
 
     public static ObjectDefinition create(String id, String displayName, String type, String description) {
@@ -76,5 +78,33 @@ public class ObjectDefinition {
 
     public boolean isArtifact() {
         return artifactId != null;
+    }
+
+    public String creatureId() {
+        return creatureId;
+    }
+
+    public void setCreatureId(String creatureId) {
+        if (creatureId == null || creatureId.isBlank()) {
+            this.creatureId = null;
+            return;
+        }
+        this.creatureId = creatureId;
+    }
+
+    public boolean isCreature() {
+        return creatureId != null;
+    }
+
+    public String blockedByCreature() {
+        return blockedByCreatureId;
+    }
+
+    public void setBlockedByCreature(String creatureId) {
+        if (creatureId == null || creatureId.isBlank()) {
+            this.blockedByCreatureId = null;
+            return;
+        }
+        this.blockedByCreatureId = creatureId;
     }
 }

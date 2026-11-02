@@ -28,6 +28,7 @@ public class ActionResult {
         OBJECT_CONDITION,
         SPIRIT_SUMMONED,
         REVEALED_OBJECTS,
-        ARTIFACT_EQUIPPED
+        ARTIFACT_EQUIPPED,
+        CREATURE_NEUTRALIZED
     }
 }

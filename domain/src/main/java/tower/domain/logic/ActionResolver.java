@@ -1,6 +1,7 @@
 package tower.domain.logic;
 
 import tower.domain.action.GameAction;
+import tower.domain.data.CreatureDefinition;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.RoomExit;
@@ -40,6 +41,15 @@ public class ActionResolver {
 
     public List<GameAction> availableActions(
             GameState state, List<RoomDefinition> rooms, String objectId, List<SpellDefinition> spells) {
+        return availableActions(state, rooms, objectId, spells, List.of());
+    }
+
+    public List<GameAction> availableActions(
+            GameState state,
+            List<RoomDefinition> rooms,
+            String objectId,
+            List<SpellDefinition> spells,
+            List<CreatureDefinition> creatures) {
         if (state == null) {
             return List.of();
         }
@@ -54,9 +64,63 @@ public class ActionResolver {
         String name = object.displayName().isBlank() ? objectId : object.displayName();
         var actions = new ArrayList<GameAction>();
         actions.add(GameAction.examine(objectId, "Examine " + name));
+        if (blocked(state, object)) {
+            return List.copyOf(actions);
+        }
         addTakeAction(actions, state, object);
-        addCastActions(actions, state, object, spells);
+        if (object.isCreature()) {
+            addNeutralizeActions(actions, state, object, spells, creatures);
+        } else {
+            addCastActions(actions, state, object, spells);
+        }
         return List.copyOf(actions);
+    }
+
+    private static boolean blocked(GameState state, ObjectDefinition object) {
+        String creatureId = object.blockedByCreature();
+        return creatureId != null && !state.creatureNeutralized(creatureId);
+    }
+
+    private static void addNeutralizeActions(
+            List<GameAction> actions,
+            GameState state,
+            ObjectDefinition object,
+            List<SpellDefinition> spells,
+            List<CreatureDefinition> creatures) {
+        if (spells == null || state.creatureNeutralized(object.creatureId())) {
+            return;
+        }
+        CreatureDefinition creature = findCreature(creatures, object.creatureId());
+        if (creature == null) {
+            return;
+        }
+        var seen = new LinkedHashSet<String>();
+        for (SpellDefinition spell : spells) {
+            if (spell == null) {
+                continue;
+            }
+            String spellId = spell.id();
+            if (spellId.isBlank() || !seen.add(spellId)) {
+                continue;
+            }
+            if (!state.player().knowsSpell(spellId) || !creature.neutralizedBy(spellId)) {
+                continue;
+            }
+            String name = spell.displayName().isBlank() ? spellId : spell.displayName();
+            actions.add(GameAction.cast(spellId, "Cast: " + name));
+        }
+    }
+
+    private static CreatureDefinition findCreature(List<CreatureDefinition> creatures, String creatureId) {
+        if (creatures == null || creatureId == null) {
+            return null;
+        }
+        for (CreatureDefinition creature : creatures) {
+            if (creature != null && creature.id().equals(creatureId)) {
+                return creature;
+            }
+        }
+        return null;
     }
 
     private static void addTakeAction(List<GameAction> actions, GameState state, ObjectDefinition object) {

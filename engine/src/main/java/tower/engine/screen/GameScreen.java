@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import tower.domain.action.ActionResult;
 import tower.domain.action.GameAction;
 import tower.domain.data.ArtifactDefinition;
+import tower.domain.data.CreatureDefinition;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.SpellDefinition;
@@ -39,6 +40,7 @@ public class GameScreen implements Screen {
     private final List<SpellDefinition> spells;
     private final List<SpiritDefinition> spirits;
     private final List<ArtifactDefinition> artifacts;
+    private final List<CreatureDefinition> creatures;
     private final GameState state;
     private final ActionResolver resolver = new ActionResolver();
     private final ActionExecutor executor = new ActionExecutor();
@@ -56,7 +58,8 @@ public class GameScreen implements Screen {
             List<RoomDefinition> rooms,
             List<SpellDefinition> spells,
             List<SpiritDefinition> spirits,
-            List<ArtifactDefinition> artifacts) {
+            List<ArtifactDefinition> artifacts,
+            List<CreatureDefinition> creatures) {
         if (state == null) {
             throw new IllegalArgumentException("Game state is missing");
         }
@@ -65,6 +68,7 @@ public class GameScreen implements Screen {
         this.spells = spells == null ? List.of() : List.copyOf(spells);
         this.spirits = spirits == null ? List.of() : List.copyOf(spirits);
         this.artifacts = artifacts == null ? List.of() : List.copyOf(artifacts);
+        this.creatures = creatures == null ? List.of() : List.copyOf(creatures);
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
@@ -191,7 +195,7 @@ public class GameScreen implements Screen {
     }
 
     private ActionResult run(GameAction action) {
-        return executor.execute(state, rooms, action, spells, spirits, artifacts);
+        return executor.execute(state, rooms, action, spells, spirits, artifacts, creatures);
     }
 
     private static String text(ActionResult result) {
@@ -215,7 +219,7 @@ public class GameScreen implements Screen {
     }
 
     private List<GameAction> objectActions() {
-        return resolver.availableActions(state, rooms, state.selectedObjectId(), spells);
+        return resolver.availableActions(state, rooms, state.selectedObjectId(), spells, creatures);
     }
 
     private String selectedName() {
