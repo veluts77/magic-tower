@@ -1,5 +1,6 @@
 package tower.domain.action;
 
+import static tower.domain.action.ActionType.ASCEND;
 import static tower.domain.action.ActionType.CAST;
 import static tower.domain.action.ActionType.EXAMINE;
 import static tower.domain.action.ActionType.LOOK;
@@ -43,5 +44,9 @@ public class GameAction {
 
     public static GameAction take(String objectId, String label) {
         return new GameAction("take:" + objectId, TAKE, objectId, label);
+    }
+
+    public static GameAction ascend(String floorId, String label) {
+        return new GameAction("ascend:" + floorId, ASCEND, floorId, label);
     }
 }

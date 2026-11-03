@@ -10,6 +10,7 @@ import tower.domain.action.ActionResult;
 import tower.domain.action.GameAction;
 import tower.domain.data.ArtifactDefinition;
 import tower.domain.data.CreatureDefinition;
+import tower.domain.data.FloorDefinition;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.SpellDefinition;
@@ -21,7 +22,9 @@ import tower.engine.render.ActionPanel;
 import tower.engine.render.RoomRenderer;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
 import static tower.domain.action.ActionType.LOOK;
@@ -36,7 +39,9 @@ public class GameScreen implements Screen {
     private static final GameAction UNAVAILABLE_ACTION =
             new GameAction("unavailable", LOOK, "unavailable", "Unavailable");
 
-    private final List<RoomDefinition> rooms;
+    private final Map<String, FloorDefinition> floors;
+    private final Map<String, List<RoomDefinition>> roomsByFloor;
+    private final List<FloorDefinition> floorList;
     private final List<SpellDefinition> spells;
     private final List<SpiritDefinition> spirits;
     private final List<ArtifactDefinition> artifacts;
@@ -55,7 +60,8 @@ public class GameScreen implements Screen {
 
     public GameScreen(
             GameState state,
-            List<RoomDefinition> rooms,
+            Map<String, FloorDefinition> floors,
+            Map<String, List<RoomDefinition>> roomsByFloor,
             List<SpellDefinition> spells,
             List<SpiritDefinition> spirits,
             List<ArtifactDefinition> artifacts,
@@ -64,7 +70,18 @@ public class GameScreen implements Screen {
             throw new IllegalArgumentException("Game state is missing");
         }
         this.state = state;
-        this.rooms = rooms == null ? List.of() : List.copyOf(rooms);
+        this.floors = new LinkedHashMap<>();
+        if (floors != null) {
+            this.floors.putAll(floors);
+        }
+        this.roomsByFloor = new LinkedHashMap<>();
+        if (roomsByFloor != null) {
+            for (var entry : roomsByFloor.entrySet()) {
+                List<RoomDefinition> roomList = entry.getValue();
+                this.roomsByFloor.put(entry.getKey(), roomList == null ? List.of() : List.copyOf(roomList));
+            }
+        }
+        this.floorList = List.copyOf(this.floors.values());
         this.spells = spells == null ? List.of() : List.copyOf(spells);
         this.spirits = spirits == null ? List.of() : List.copyOf(spirits);
         this.artifacts = artifacts == null ? List.of() : List.copyOf(artifacts);
@@ -81,6 +98,7 @@ public class GameScreen implements Screen {
         applyInput();
         List<String> lines = lines();
         String heading = heading();
+        String progress = progress();
         RoomDefinition room = currentRoom();
 
         Gdx.gl.glClearColor(0.08f, 0.08f, 0.10f, 1f);
@@ -91,7 +109,7 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
 
         float width = camera.viewportWidth - 96f;
-        float inset = actionPanel.reservedHeight(heading, lines, message, font, width);
+        float inset = actionPanel.reservedHeight(progress, heading, lines, message, font, width);
         roomRenderer.draw(
                 room,
                 shapes,
@@ -102,7 +120,7 @@ public class GameScreen implements Screen {
                 inset,
                 mode == Mode.SELECT_OBJECT,
                 state);
-        actionPanel.draw(heading, lines, message, batch, font, width, inset);
+        actionPanel.draw(progress, heading, lines, message, batch, font, width, inset);
     }
 
     @Override
@@ -153,7 +171,7 @@ public class GameScreen implements Screen {
     }
 
     private void chooseRoomAction() {
-        List<GameAction> actions = resolver.availableActions(state, rooms, spirits);
+        List<GameAction> actions = resolver.availableActions(state, rooms(), spirits, floor());
         int index = selectedIndex(actions.size());
         if (index == NONE) {
             return;
@@ -195,7 +213,7 @@ public class GameScreen implements Screen {
     }
 
     private ActionResult run(GameAction action) {
-        return executor.execute(state, rooms, action, spells, spirits, artifacts, creatures);
+        return executor.execute(state, rooms(), action, spells, spirits, artifacts, creatures, floor(), floorList);
     }
 
     private static String text(ActionResult result) {
@@ -204,7 +222,7 @@ public class GameScreen implements Screen {
 
     private List<String> lines() {
         return switch (mode) {
-            case ROOM -> labels(resolver.availableActions(state, rooms, spirits));
+            case ROOM -> labels(resolver.availableActions(state, rooms(), spirits, floor()));
             case SELECT_OBJECT -> objectLabels(visibleObjects());
             case OBJECT_ACTIONS -> labels(objectActions());
         };
@@ -219,7 +237,7 @@ public class GameScreen implements Screen {
     }
 
     private List<GameAction> objectActions() {
-        return resolver.availableActions(state, rooms, state.selectedObjectId(), spells, creatures);
+        return resolver.availableActions(state, rooms(), state.selectedObjectId(), spells, creatures);
     }
 
     private String selectedName() {
@@ -266,8 +284,30 @@ public class GameScreen implements Screen {
         return state.visibleObjects(currentRoom());
     }
 
+    private String progress() {
+        FloorDefinition current = floor();
+        if (current == null) {
+            return "";
+        }
+        int earned = state.floorState().earnedCount();
+        String line = "Marks: " + earned + "/" + current.markCount() + ", need " + current.ascentThreshold();
+        if (current.ascentUnlocked(earned)) {
+            return line + ". The way up is open.";
+        }
+        return line;
+    }
+
+    private FloorDefinition floor() {
+        return floors.get(state.currentFloorId());
+    }
+
+    private List<RoomDefinition> rooms() {
+        List<RoomDefinition> found = roomsByFloor.get(state.currentFloorId());
+        return found == null ? List.of() : found;
+    }
+
     private RoomDefinition currentRoom() {
-        for (RoomDefinition room : rooms) {
+        for (RoomDefinition room : rooms()) {
             if (room.sameId(state.currentRoomId())) {
                 return room;
             }

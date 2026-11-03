@@ -14,20 +14,24 @@ import java.util.Set;
 
 public class GameState {
 
-    private final String floorId;
+    private String floorId = "";
     private String currentRoomId;
     private String selectedObjectId;
     private final PlayerState player = new PlayerState();
+    private FloorState floorState = new FloorState();
     private final Map<String, RoomState> roomStates = new LinkedHashMap<>();
     private final Set<String> visitedRoomIds = new LinkedHashSet<>();
 
-    private GameState(String floorId, String startingRoomId) {
-        this.floorId = floorId;
-        this.currentRoomId = startingRoomId;
-        this.visitedRoomIds.add(startingRoomId);
+    private GameState() {
     }
 
     public static GameState start(FloorDefinition floor) {
+        var state = new GameState();
+        state.enterFloor(floor);
+        return state;
+    }
+
+    public void enterFloor(FloorDefinition floor) {
         if (floor == null) {
             throw new IllegalArgumentException("Floor is missing");
         }
@@ -41,7 +45,13 @@ public class GameState {
         if (startingRoomId == null || startingRoomId.isBlank()) {
             throw new IllegalArgumentException("Starting room is missing");
         }
-        return new GameState(floor.id(), startingRoomId);
+        floorId = floor.id();
+        currentRoomId = startingRoomId;
+        selectedObjectId = null;
+        floorState = new FloorState();
+        roomStates.clear();
+        visitedRoomIds.clear();
+        visitedRoomIds.add(startingRoomId);
     }
 
     public String currentFloorId() {
@@ -73,6 +83,10 @@ public class GameState {
 
     public PlayerState player() {
         return player;
+    }
+
+    public FloorState floorState() {
+        return floorState;
     }
 
     public String objectCondition(String objectId) {

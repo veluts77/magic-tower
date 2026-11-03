@@ -1,6 +1,65 @@
 {
   "id": "ground",
   "displayName": "Ground Floor",
+  "ascentThreshold": 7,
+  "marks": [
+    {
+      "id": "faded_words",
+      "displayName": "Faded Words",
+      "description": "The faded inscription has been read.",
+      "action": "examine",
+      "target": "inscription"
+    },
+    {
+      "id": "quiet_flame",
+      "displayName": "Quiet Flame",
+      "description": "The Ring of Quiet Flame has been taken.",
+      "action": "take",
+      "target": "ring_of_quiet_flame"
+    },
+    {
+      "id": "ash_slug_calmed",
+      "displayName": "Ash Slug Calmed",
+      "description": "The ash slug no longer blocks the chest.",
+      "action": "cast",
+      "target": "ash_slug"
+    },
+    {
+      "id": "seeker_called",
+      "displayName": "Seeker Called",
+      "description": "The seeker has been summoned on this floor.",
+      "action": "summon",
+      "target": "seeker"
+    },
+    {
+      "id": "worn_sigil",
+      "displayName": "Worn Sigil",
+      "description": "The hidden sigil has been examined.",
+      "action": "examine",
+      "target": "sigil"
+    },
+    {
+      "id": "flame_veil",
+      "displayName": "Flame Veil",
+      "description": "The flame veil has been crossed.",
+      "action": "move",
+      "target": "veil"
+    },
+    {
+      "id": "brazier_lit",
+      "displayName": "Brazier Lit",
+      "description": "Spark has been cast on the cold brazier.",
+      "action": "cast",
+      "target": "brazier"
+    },
+    {
+      "id": "ash_chest",
+      "displayName": "Ash Chest",
+      "description": "Spark has been cast on the ash chest.",
+      "action": "cast",
+      "target": "chest"
+    }
+  ],
   "rooms": [
     {
       "id": "entrance",
@@ -44,6 +103,10 @@
         {
           "targetRoomId": "veil",
           "label": "Go to the Flame Veil"
+        },
+        {
+          "targetFloorId": "upper",
+          "label": "Ascend"
         }
       ],
       "objects": [

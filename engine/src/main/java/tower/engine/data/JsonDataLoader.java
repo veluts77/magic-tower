@@ -4,10 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import tower.domain.action.ActionType;
 import tower.domain.data.ArtifactDefinition;
 import tower.domain.data.ArtifactEffect;
 import tower.domain.data.CreatureDefinition;
 import tower.domain.data.FloorDefinition;
+import tower.domain.data.MasteryMarkDefinition;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.RoomExit;
@@ -23,6 +25,12 @@ import java.util.Comparator;
 import java.util.List;
 
 import static java.util.Locale.ROOT;
+import static tower.domain.action.ActionType.CAST;
+import static tower.domain.action.ActionType.EXAMINE;
+import static tower.domain.action.ActionType.LOOK;
+import static tower.domain.action.ActionType.MOVE;
+import static tower.domain.action.ActionType.SUMMON;
+import static tower.domain.action.ActionType.TAKE;
 import static tower.domain.data.ArtifactEffect.FIRE_PROTECTION;
 import static tower.domain.data.RoomHazard.FIRE;
 import static tower.domain.data.SpellTarget.CREATURE;
@@ -73,6 +81,8 @@ public class JsonDataLoader implements DataLoader {
             roomIds.add(room.id());
         }
         floor.setRoomIds(roomIds);
+        floor.setMarks(readMarks(root.get("marks")));
+        floor.setAscentThreshold(root.getInt("ascentThreshold", 0));
         return floor;
     }
 
@@ -257,9 +267,50 @@ public class JsonDataLoader implements DataLoader {
             return exits;
         }
         for (JsonValue exitJson : exitsJson) {
+            String floorId = text(exitJson, "targetFloorId");
+            if (!floorId.isBlank()) {
+                exits.add(RoomExit.ascend(floorId, text(exitJson, "label")));
+                continue;
+            }
             exits.add(RoomExit.create(text(exitJson, "targetRoomId"), text(exitJson, "label")));
         }
         return exits;
+    }
+
+    private static List<MasteryMarkDefinition> readMarks(JsonValue marksJson) {
+        var marks = new ArrayList<MasteryMarkDefinition>();
+        if (marksJson == null || !marksJson.isArray()) {
+            return marks;
+        }
+        for (JsonValue markJson : marksJson) {
+            var mark = MasteryMarkDefinition.create(
+                    text(markJson, "id"),
+                    text(markJson, "displayName"),
+                    text(markJson, "description"),
+                    markAction(markJson),
+                    text(markJson, "target"));
+            if (mark.id().isBlank()) {
+                throw new IllegalArgumentException("Mark id is missing");
+            }
+            marks.add(mark);
+        }
+        return marks;
+    }
+
+    private static ActionType markAction(JsonValue node) {
+        String value = text(node, "action");
+        if (value.isBlank()) {
+            throw new IllegalArgumentException("Mark action is missing");
+        }
+        return switch (value.toLowerCase(ROOT)) {
+            case "look" -> LOOK;
+            case "move" -> MOVE;
+            case "examine" -> EXAMINE;
+            case "cast" -> CAST;
+            case "summon" -> SUMMON;
+            case "take" -> TAKE;
+            default -> throw new IllegalArgumentException("Unknown mark action: " + value);
+        };
     }
 
     private static List<String> readIds(JsonValue array) {

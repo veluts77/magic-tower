@@ -2,6 +2,7 @@ package tower.domain.logic;
 
 import tower.domain.action.GameAction;
 import tower.domain.data.CreatureDefinition;
+import tower.domain.data.FloorDefinition;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.data.RoomExit;
@@ -24,13 +25,18 @@ public class ActionResolver {
 
     public List<GameAction> availableActions(
             GameState state, List<RoomDefinition> rooms, List<SpiritDefinition> spirits) {
+        return availableActions(state, rooms, spirits, null);
+    }
+
+    public List<GameAction> availableActions(
+            GameState state, List<RoomDefinition> rooms, List<SpiritDefinition> spirits, FloorDefinition floor) {
         if (state == null) {
             return List.of();
         }
         RoomDefinition room = Rooms.find(rooms, state.currentRoomId());
         var actions = new ArrayList<GameAction>();
         actions.add(GameAction.look());
-        addMoveActions(actions, room, rooms);
+        addMoveActions(actions, room, rooms, state, floor);
         addSummonActions(actions, state, spirits);
         return List.copyOf(actions);
     }
@@ -178,14 +184,36 @@ public class ActionResolver {
         }
     }
 
-    private static void addMoveActions(List<GameAction> actions, RoomDefinition room, List<RoomDefinition> rooms) {
+    private static void addMoveActions(
+            List<GameAction> actions,
+            RoomDefinition room,
+            List<RoomDefinition> rooms,
+            GameState state,
+            FloorDefinition floor) {
         for (RoomExit exit : room.getExits()) {
+            if (exit.ascends()) {
+                addAscentAction(actions, exit, state, floor);
+                continue;
+            }
             String targetRoomId = exit.targetRoomId();
             if (targetRoomId == null || targetRoomId.isBlank()) {
                 continue;
             }
             actions.add(GameAction.move(targetRoomId, moveLabel(exit, Rooms.find(rooms, targetRoomId))));
         }
+    }
+
+    private static void addAscentAction(
+            List<GameAction> actions, RoomExit exit, GameState state, FloorDefinition floor) {
+        if (floor == null || state == null || !floor.ascentUnlocked(state.floorState().earnedCount())) {
+            return;
+        }
+        String floorId = exit.targetFloorId();
+        if (floorId == null || floorId.isBlank()) {
+            return;
+        }
+        String label = exit.label().isBlank() ? "Ascend" : exit.label();
+        actions.add(GameAction.ascend(floorId, label));
     }
 
     private static String moveLabel(RoomExit exit, RoomDefinition destination) {

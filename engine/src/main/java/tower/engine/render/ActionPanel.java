@@ -18,16 +18,17 @@ public class ActionPanel {
 
     private final GlyphLayout layout = new GlyphLayout();
 
-    public float reservedHeight(String heading, List<String> lines, String message, BitmapFont font, float width) {
-        float text = textHeight(heading, lines, message, font, width);
+    public float reservedHeight(
+            String status, String heading, List<String> lines, String message, BitmapFont font, float width) {
+        float text = textHeight(status, heading, lines, message, font, width);
         if (text == 0f) {
             return 0f;
         }
         return text + GAP;
     }
 
-    public void draw(String heading, List<String> lines, String message, SpriteBatch batch, BitmapFont font,
-                     float width, float reservedHeight) {
+    public void draw(String status, String heading, List<String> lines, String message, SpriteBatch batch,
+                     BitmapFont font, float width, float reservedHeight) {
         if (reservedHeight <= 0f) {
             return;
         }
@@ -35,6 +36,10 @@ public class ActionPanel {
         font.setColor(WHITE);
         batch.begin();
         float baseline = top - font.getCapHeight();
+        if (visible(status)) {
+            font.draw(batch, status, LEFT, baseline);
+            baseline -= LINE;
+        }
         if (visible(heading)) {
             font.draw(batch, heading, LEFT, baseline);
             baseline -= LINE;
@@ -52,14 +57,19 @@ public class ActionPanel {
         batch.end();
     }
 
-    private float textHeight(String heading, List<String> lines, String message, BitmapFont font, float width) {
+    private float textHeight(
+            String status, String heading, List<String> lines, String message, BitmapFont font, float width) {
         int count = lines == null ? 0 : lines.size();
+        boolean hasStatus = visible(status);
         boolean hasHeading = visible(heading);
         boolean hasMessage = visible(message);
-        if (count == 0 && !hasHeading && !hasMessage) {
+        if (count == 0 && !hasStatus && !hasHeading && !hasMessage) {
             return 0f;
         }
         float height = font.getCapHeight() + 4f;
+        if (hasStatus) {
+            height += LINE;
+        }
         if (hasHeading) {
             height += LINE;
         }

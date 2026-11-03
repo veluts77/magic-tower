@@ -29,6 +29,9 @@ public class ActionResult {
         SPIRIT_SUMMONED,
         REVEALED_OBJECTS,
         ARTIFACT_EQUIPPED,
-        CREATURE_NEUTRALIZED
+        CREATURE_NEUTRALIZED,
+        MASTERY_MARK,
+        ASCENT_UNLOCKED,
+        CURRENT_FLOOR
     }
 }

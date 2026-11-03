@@ -5,13 +5,17 @@ import com.badlogic.gdx.Gdx;
 import tower.domain.data.ArtifactDefinition;
 import tower.domain.data.CreatureDefinition;
 import tower.domain.data.FloorDefinition;
+import tower.domain.data.RoomDefinition;
+import tower.domain.data.RoomExit;
 import tower.domain.data.SpellDefinition;
 import tower.domain.data.SpiritDefinition;
 import tower.domain.state.GameState;
 import tower.engine.data.JsonDataLoader;
 import tower.engine.screen.GameScreen;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.badlogic.gdx.Input.Keys.ESCAPE;
 
@@ -20,7 +24,10 @@ public class TowerGame extends Game {
     @Override
     public void create() {
         var loader = new JsonDataLoader();
-        FloorDefinition floor = loader.loadFloor("ground");
+        var floors = new LinkedHashMap<String, FloorDefinition>();
+        var roomsByFloor = new LinkedHashMap<String, List<RoomDefinition>>();
+        loadFloors(loader, "ground", floors, roomsByFloor);
+        FloorDefinition floor = floors.get("ground");
         List<SpellDefinition> spells = loader.loadSpells();
         List<SpiritDefinition> spirits = loader.loadSpirits();
         List<ArtifactDefinition> artifacts = loader.loadArtifacts();
@@ -29,6 +36,7 @@ public class TowerGame extends Game {
                 "TowerGame",
                 "Loaded floor: " + floor.displayName()
                         + ", rooms: " + floor.roomCount()
+                        + ", marks: " + floor.markCount()
                         + ", spells: " + spells.size()
                         + ", spirits: " + spirits.size()
                         + ", artifacts: " + artifacts.size()
@@ -36,7 +44,28 @@ public class TowerGame extends Game {
         var state = GameState.start(floor);
         state.player().learnSpell("spark");
         state.player().learnSpirit("seeker");
-        setScreen(new GameScreen(state, loader.loadedRooms(), spells, spirits, artifacts, creatures));
+        setScreen(new GameScreen(state, floors, roomsByFloor, spells, spirits, artifacts, creatures));
+    }
+
+    private static void loadFloors(
+            JsonDataLoader loader,
+            String floorId,
+            Map<String, FloorDefinition> floors,
+            Map<String, List<RoomDefinition>> roomsByFloor) {
+        if (floorId == null || floorId.isBlank() || floors.containsKey(floorId)) {
+            return;
+        }
+        FloorDefinition floor = loader.loadFloor(floorId);
+        List<RoomDefinition> rooms = loader.loadedRooms();
+        floors.put(floor.id(), floor);
+        roomsByFloor.put(floor.id(), rooms);
+        for (RoomDefinition room : rooms) {
+            for (RoomExit exit : room.getExits()) {
+                if (exit.ascends()) {
+                    loadFloors(loader, exit.targetFloorId(), floors, roomsByFloor);
+                }
+            }
+        }
     }
 
     @Override
