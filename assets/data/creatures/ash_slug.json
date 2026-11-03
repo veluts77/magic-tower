@@ -1,6 +1,6 @@
 {
   "id": "ash_slug",
-  "displayName": "Ash Slug",
-  "description": "A slow slug of warm ash. It lies across the chest and will not move.",
+  "displayName": "Пепельный слизень",
+  "description": "Медленный слизень из тёплого пепла. Он лежит на сундуке и не сходит, пока его не спугнёт искра.",
   "neutralizedBy": ["spark"]
 }

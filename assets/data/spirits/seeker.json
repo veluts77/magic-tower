@@ -1,6 +1,6 @@
 {
   "id": "seeker",
-  "displayName": "Seeker",
-  "description": "A patient spirit that notices what was left unseen.",
+  "displayName": "Дух-искатель",
+  "description": "Терпеливый дух. После призыва замечает в комнате то, что само не показывается.",
   "function": "seek"
 }

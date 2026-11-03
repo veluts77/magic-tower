@@ -26,8 +26,8 @@ public class TowerGame extends Game {
         var loader = new JsonDataLoader();
         var floors = new LinkedHashMap<String, FloorDefinition>();
         var roomsByFloor = new LinkedHashMap<String, List<RoomDefinition>>();
-        loadFloors(loader, "ground", floors, roomsByFloor);
-        FloorDefinition floor = floors.get("ground");
+        loadFloors(loader, "floor_01_dusty_archive", floors, roomsByFloor);
+        FloorDefinition floor = floors.get("floor_01_dusty_archive");
         List<SpellDefinition> spells = loader.loadSpells();
         List<SpiritDefinition> spirits = loader.loadSpirits();
         List<ArtifactDefinition> artifacts = loader.loadArtifacts();
@@ -42,8 +42,12 @@ public class TowerGame extends Game {
                         + ", artifacts: " + artifacts.size()
                         + ", creatures: " + creatures.size());
         var state = GameState.start(floor);
-        state.player().learnSpell("spark");
-        state.player().learnSpirit("seeker");
+        for (String spellId : floor.startingSpells()) {
+            state.player().learnSpell(spellId);
+        }
+        for (String markId : floor.grantedAtStart()) {
+            state.floorState().addMark(markId);
+        }
         setScreen(new GameScreen(state, floors, roomsByFloor, spells, spirits, artifacts, creatures));
     }
 

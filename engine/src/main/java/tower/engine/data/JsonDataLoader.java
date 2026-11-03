@@ -83,6 +83,8 @@ public class JsonDataLoader implements DataLoader {
         floor.setRoomIds(roomIds);
         floor.setMarks(readMarks(root.get("marks")));
         floor.setAscentThreshold(root.getInt("ascentThreshold", 0));
+        floor.setStartingSpells(readIds(root.get("startingSpells")));
+        floor.setStartingMarks(readIds(root.get("startingMarks")));
         return floor;
     }
 
@@ -256,6 +258,9 @@ public class JsonDataLoader implements DataLoader {
             object.setArtifactId(text(objectJson, "artifact"));
             object.setCreatureId(text(objectJson, "creature"));
             object.setBlockedByCreature(text(objectJson, "blockedByCreature"));
+            object.setSpellId(text(objectJson, "spell"));
+            object.setSpiritId(text(objectJson, "spirit"));
+            object.setItemId(text(objectJson, "item"));
             objects.add(object);
         }
         return objects;
@@ -272,7 +277,9 @@ public class JsonDataLoader implements DataLoader {
                 exits.add(RoomExit.ascend(floorId, text(exitJson, "label")));
                 continue;
             }
-            exits.add(RoomExit.create(text(exitJson, "targetRoomId"), text(exitJson, "label")));
+            RoomExit exit = RoomExit.create(text(exitJson, "targetRoomId"), text(exitJson, "label"));
+            exit.setRequiresTaken(text(exitJson, "requiresTaken"));
+            exits.add(exit);
         }
         return exits;
     }

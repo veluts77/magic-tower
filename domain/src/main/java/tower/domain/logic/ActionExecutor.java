@@ -9,6 +9,7 @@ import tower.domain.data.FloorDefinition;
 import tower.domain.data.MasteryMarkDefinition;
 import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
+import tower.domain.data.RoomExit;
 import tower.domain.data.RoomHazard;
 import tower.domain.data.SpellDefinition;
 import tower.domain.data.SpiritDefinition;
@@ -104,7 +105,8 @@ public class ActionExecutor {
         return switch (action.type) {
             case EXAMINE -> examine(state, rooms, action, knownCreatures, floor);
             case CAST -> cast(state, rooms, action, knownSpells, knownCreatures, floor);
-            case TAKE -> take(state, rooms, action, knownArtifacts, knownCreatures, floor);
+            case TAKE -> take(
+                    state, rooms, action, knownSpells, knownSpirits, knownArtifacts, knownCreatures, floor);
             case LOOK, MOVE, SUMMON, ASCEND -> roomAction(state, rooms, action, knownSpirits, floor, knownFloors);
         };
     }
@@ -329,6 +331,8 @@ public class ActionExecutor {
             GameState state,
             List<RoomDefinition> rooms,
             GameAction action,
+            List<SpellDefinition> spells,
+            List<SpiritDefinition> spirits,
             List<ArtifactDefinition> artifacts,
             List<CreatureDefinition> creatures,
             FloorDefinition floor) {
@@ -337,11 +341,28 @@ public class ActionExecutor {
             return blocked;
         }
         ObjectDefinition object = Rooms.findObject(rooms, state.currentRoomId(), action.target);
-        if (object == null || !object.isArtifact()) {
+        if (object == null) {
             return ActionResult.rejected("That action is not available.");
         }
         RoomDefinition room = Rooms.find(rooms, state.currentRoomId());
-        if (!state.isObjectVisible(room, object.id()) || state.player().isEquipped(object.artifactId())) {
+        if (!state.isObjectVisible(room, object.id())) {
+            return ActionResult.rejected("That action is not available.");
+        }
+        if (object.isArtifact()) {
+            return takeArtifact(state, object, artifacts, floor);
+        }
+        if (object.teachesSpell()) {
+            return takeSpell(state, object, spells, spirits, floor);
+        }
+        if (object.isItem()) {
+            return takeItem(state, object, floor);
+        }
+        return ActionResult.rejected("That action is not available.");
+    }
+
+    private ActionResult takeArtifact(
+            GameState state, ObjectDefinition object, List<ArtifactDefinition> artifacts, FloorDefinition floor) {
+        if (state.player().isEquipped(object.artifactId())) {
             return ActionResult.rejected("That action is not available.");
         }
         if (!state.player().hasFreeEquipmentSlot()) {
@@ -358,6 +379,46 @@ public class ActionExecutor {
         String name = artifact.displayName().isBlank() ? artifact.id() : artifact.displayName();
         ActionResult result = ActionResult.succeeded("You take " + name + ".", ARTIFACT_EQUIPPED);
         return finish(state, floor, result, TAKE, artifact.id());
+    }
+
+    private ActionResult takeSpell(
+            GameState state,
+            ObjectDefinition object,
+            List<SpellDefinition> spells,
+            List<SpiritDefinition> spirits,
+            FloorDefinition floor) {
+        if (state.player().knowsSpell(object.spellId())) {
+            return ActionResult.rejected("That action is not available.");
+        }
+        SpellDefinition spell = findSpell(spells, object.spellId());
+        if (spell == null || spell.id().isBlank()) {
+            return ActionResult.rejected("That action is not available.");
+        }
+        SpiritDefinition spirit = null;
+        if (object.spiritId() != null) {
+            spirit = findSpirit(spirits, object.spiritId());
+            if (spirit == null || spirit.id().isBlank()) {
+                return ActionResult.rejected("That action is not available.");
+            }
+        }
+        state.player().learnSpell(spell.id());
+        if (spirit != null) {
+            state.player().learnSpirit(spirit.id());
+        }
+        state.takeObject(object.id());
+        String name = spell.displayName().isBlank() ? spell.id() : spell.displayName();
+        ActionResult result = ActionResult.succeeded("You take " + name + ".");
+        return finish(state, floor, result, TAKE, spell.id());
+    }
+
+    private ActionResult takeItem(GameState state, ObjectDefinition object, FloorDefinition floor) {
+        if (state.objectTaken(object.id())) {
+            return ActionResult.rejected("That action is not available.");
+        }
+        state.takeObject(object.id());
+        String name = object.displayName().isBlank() ? object.itemId() : object.displayName();
+        ActionResult result = ActionResult.succeeded("You take " + name + ".");
+        return finish(state, floor, result, TAKE, object.itemId());
     }
 
     private static ArtifactDefinition findArtifact(List<ArtifactDefinition> artifacts, String artifactId) {
@@ -377,6 +438,10 @@ public class ActionExecutor {
 
     private ActionResult move(GameState state, List<RoomDefinition> rooms, GameAction action, FloorDefinition floor) {
         String targetRoomId = action.target;
+        RoomExit exit = exitTo(Rooms.find(rooms, state.currentRoomId()), targetRoomId);
+        if (exit != null && exit.requiresTaken() != null && !state.objectTaken(exit.requiresTaken())) {
+            return ActionResult.rejected("The way is locked.");
+        }
         RoomDefinition destination = Rooms.find(rooms, targetRoomId);
         RoomHazard hazard = destination.hazard();
         if (hazard != null && !state.player().hasEffect(hazard.requiredProtection())) {
@@ -436,6 +501,18 @@ public class ActionExecutor {
         }
         String message = result.message.isBlank() ? extra : result.message + " " + extra;
         return ActionResult.succeeded(message, changes.toArray(ActionResult.Change[]::new));
+    }
+
+    private static RoomExit exitTo(RoomDefinition room, String targetRoomId) {
+        if (room == null || room.getExits() == null || targetRoomId == null) {
+            return null;
+        }
+        for (RoomExit exit : room.getExits()) {
+            if (exit != null && targetRoomId.equals(exit.targetRoomId())) {
+                return exit;
+            }
+        }
+        return null;
     }
 
     private static FloorDefinition findFloor(List<FloorDefinition> floors, String floorId) {

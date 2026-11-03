@@ -1,6 +1,6 @@
 {
   "id": "ring_of_quiet_flame",
-  "displayName": "Ring of Quiet Flame",
-  "description": "A thin band that stays cool. Its quiet flame turns a greater fire aside.",
+  "displayName": "Кольцо тихого пламени",
+  "description": "Тонкий ободок, который остаётся холодным. Его тихое пламя отводит больший огонь.",
   "effect": "fire_protection"
 }

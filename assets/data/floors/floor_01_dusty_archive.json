@@ -1,0 +1,250 @@
+{
+  "id": "floor_01_dusty_archive",
+  "displayName": "Пыльный архив",
+  "ascentThreshold": 7,
+  "startingSpells": ["spark"],
+  "startingMarks": ["found_spark"],
+  "marks": [
+    {
+      "id": "found_spark",
+      "displayName": "Искра",
+      "description": "Искра уже известна с порога архива.",
+      "action": "examine",
+      "target": "spark"
+    },
+    {
+      "id": "found_push",
+      "displayName": "Толчок",
+      "description": "Страница толчка взята со стола карт.",
+      "action": "take",
+      "target": "push"
+    },
+    {
+      "id": "lit_the_lantern",
+      "displayName": "Зажжённый фонарь",
+      "description": "Искра зажгла магический фонарь.",
+      "action": "cast",
+      "target": "lantern"
+    },
+    {
+      "id": "picked_ring",
+      "displayName": "Кольцо тихого пламени",
+      "description": "Кольцо тихого пламени надето.",
+      "action": "take",
+      "target": "ring_of_quiet_flame"
+    },
+    {
+      "id": "entered_gatekeeper_cell",
+      "displayName": "Келья привратника",
+      "description": "Путь через огонь в келью пройден.",
+      "action": "move",
+      "target": "gatekeeper_cell"
+    },
+    {
+      "id": "neutralized_slug",
+      "displayName": "Слизень утих",
+      "description": "Пепельный слизень отступил от сундука.",
+      "action": "cast",
+      "target": "ash_slug"
+    },
+    {
+      "id": "summoned_seeker",
+      "displayName": "Искатель призван",
+      "description": "Дух-искатель призван в скрытой келье.",
+      "action": "summon",
+      "target": "seeker"
+    },
+    {
+      "id": "found_hidden_rune",
+      "displayName": "Древняя руна",
+      "description": "Скрытая руна найдена после призыва.",
+      "action": "examine",
+      "target": "ancient_rune"
+    }
+  ],
+  "rooms": [
+    {
+      "id": "entrance_hall",
+      "displayName": "Прихожая архива",
+      "description": "Пыльная прихожая. Люстра висит криво, пол засыпан, а дверь вглубь с этой стороны не открывается.",
+      "exits": [
+        {
+          "targetRoomId": "map_hall",
+          "label": "Идти в зал карт"
+        }
+      ],
+      "objects": [
+        {
+          "id": "broken_chandelier",
+          "displayName": "Сломанная люстра",
+          "type": "fixture",
+          "description": "Цепь перекошена. В чашах давно нет огня, только серая пыль."
+        },
+        {
+          "id": "dusty_floor",
+          "displayName": "Засыпанный пол",
+          "type": "fixture",
+          "description": "Пыль лежит толстым слоем. Следов, кроме ваших, нет."
+        },
+        {
+          "id": "closed_door",
+          "displayName": "Закрытая дверь",
+          "type": "fixture",
+          "description": "Тяжёлая дверь вглубь архива. С этой стороны она не поддаётся."
+        }
+      ]
+    },
+    {
+      "id": "map_hall",
+      "displayName": "Зал карт",
+      "description": "Длинный зал. На столе лежат карты и страница заклинания. Фонарь погас, ящик рядом запечатан.",
+      "exits": [
+        {
+          "targetRoomId": "entrance_hall",
+          "label": "Вернуться в прихожую"
+        },
+        {
+          "targetRoomId": "flooded_gallery",
+          "label": "Идти в затопленную галерею"
+        }
+      ],
+      "objects": [
+        {
+          "id": "map_table",
+          "displayName": "Стол с картами",
+          "type": "fixture",
+          "description": "Карты башни выцвели. На краю стола лежит отдельная страница."
+        },
+        {
+          "id": "push_page",
+          "displayName": "Страница толчка",
+          "type": "spell",
+          "description": "Короткая формула толчка. Ею можно сдвинуть то, что само не двигается.",
+          "spell": "push"
+        },
+        {
+          "id": "lantern",
+          "displayName": "Магический фонарь",
+          "type": "fixture",
+          "description": "Стекло целое, но внутри темно. Фитиль ждёт искру.",
+          "supportedSpells": ["spark"]
+        },
+        {
+          "id": "sealed_box",
+          "displayName": "Запечатанный ящик",
+          "type": "container",
+          "description": "Крышка держится сухой печатью. Ящик молчит и не открывается от взгляда."
+        }
+      ]
+    },
+    {
+      "id": "flooded_gallery",
+      "displayName": "Затопленная галерея",
+      "description": "Пол галереи покрыт тёплой магической пылью. У дальней арки пыль вспыхивает тихим огнём и не пускает в келью.",
+      "exits": [
+        {
+          "targetRoomId": "map_hall",
+          "label": "Вернуться в зал карт"
+        },
+        {
+          "targetRoomId": "gatekeeper_cell",
+          "label": "Идти в келью привратника"
+        }
+      ],
+      "objects": [
+        {
+          "id": "quiet_ring",
+          "displayName": "Кольцо тихого пламени",
+          "type": "artifact",
+          "description": "Тонкое кольцо, холодное на ощупь. Внутри ободка спит тихое пламя.",
+          "artifact": "ring_of_quiet_flame"
+        },
+        {
+          "id": "ancient_folio",
+          "displayName": "Древний фолиант",
+          "type": "clue",
+          "description": "Страницы пахнут золой. На полях сказано: тихое пламя проходит там, где большое жжёт."
+        }
+      ]
+    },
+    {
+      "id": "gatekeeper_cell",
+      "displayName": "Келья привратника",
+      "description": "Тесная келья за огненной аркой. Пепельный слизень лежит на старом сундуке. Дальше — дверь, которой нужен ключ.",
+      "hazard": "fire",
+      "exits": [
+        {
+          "targetRoomId": "flooded_gallery",
+          "label": "Вернуться в галерею"
+        },
+        {
+          "targetRoomId": "hidden_cell",
+          "label": "Идти в скрытую келью",
+          "requiresTaken": "cell_key"
+        }
+      ],
+      "objects": [
+        {
+          "id": "ash_slug",
+          "displayName": "Пепельный слизень",
+          "type": "creature",
+          "description": "Медленный слизень из тёплого пепла. Он лежит на сундуке и не сходит.",
+          "creature": "ash_slug"
+        },
+        {
+          "id": "old_chest",
+          "displayName": "Старый сундук",
+          "type": "container",
+          "description": "Крышка в золе. Пока слизень лежит сверху, до ключа внутри не добраться.",
+          "blockedByCreature": "ash_slug"
+        },
+        {
+          "id": "cell_key",
+          "displayName": "Ключ от скрытой кельи",
+          "type": "key",
+          "description": "Холодный железный ключ. Он лежал в сундуке, под слизнем.",
+          "item": "cell_key",
+          "blockedByCreature": "ash_slug"
+        }
+      ]
+    },
+    {
+      "id": "hidden_cell",
+      "displayName": "Скрытая келья",
+      "description": "Тихая келья в конце архива. На алтаре лежит страница призыва, а лестница уходит вверх.",
+      "hiddenObjects": ["ancient_rune"],
+      "exits": [
+        {
+          "targetRoomId": "gatekeeper_cell",
+          "label": "Вернуться в келью привратника"
+        },
+        {
+          "targetFloorId": "floor_02",
+          "label": "Подняться выше"
+        }
+      ],
+      "objects": [
+        {
+          "id": "ancient_altar",
+          "displayName": "Древний алтарь",
+          "type": "fixture",
+          "description": "Камень алтаря стёрт ладонями. На нём лежит страница заклинания."
+        },
+        {
+          "id": "seeker_page",
+          "displayName": "Страница искателя",
+          "type": "spell",
+          "description": "Формула призыва. Дух-искатель замечает то, что само не показывается.",
+          "spell": "seeker",
+          "spirit": "seeker"
+        },
+        {
+          "id": "ancient_rune",
+          "displayName": "Древняя руна",
+          "type": "clue",
+          "description": "Малая руна в трещине камня. Её видно только после того, как искатель побывал здесь."
+        }
+      ]
+    }
+  ]
+}

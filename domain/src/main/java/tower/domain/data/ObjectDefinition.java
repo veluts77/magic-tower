@@ -12,6 +12,9 @@ public class ObjectDefinition {
     private String artifactId;
     private String creatureId;
     private String blockedByCreatureId;
+    private String spellId;
+    private String spiritId;
+    private String itemId;
     private List<String> supportedSpells = new ArrayList<>();
 
     public static ObjectDefinition create(String id, String displayName, String type, String description) {
@@ -106,5 +109,44 @@ public class ObjectDefinition {
             return;
         }
         this.blockedByCreatureId = creatureId;
+    }
+
+    public String spellId() {
+        return spellId;
+    }
+
+    public void setSpellId(String spellId) {
+        this.spellId = blankToNull(spellId);
+    }
+
+    public boolean teachesSpell() {
+        return spellId != null;
+    }
+
+    public String spiritId() {
+        return spiritId;
+    }
+
+    public void setSpiritId(String spiritId) {
+        this.spiritId = blankToNull(spiritId);
+    }
+
+    public String itemId() {
+        return itemId;
+    }
+
+    public void setItemId(String itemId) {
+        this.itemId = blankToNull(itemId);
+    }
+
+    public boolean isItem() {
+        return itemId != null;
+    }
+
+    private static String blankToNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value;
     }
 }

@@ -1,0 +1,15 @@
+{
+  "id": "floor_02",
+  "displayName": "Этот этаж будет добавлен позже",
+  "ascentThreshold": 0,
+  "marks": [],
+  "rooms": [
+    {
+      "id": "empty_landing",
+      "displayName": "Этот этаж будет добавлен позже.",
+      "description": "Этот этаж будет добавлен позже.",
+      "exits": [],
+      "objects": []
+    }
+  ]
+}

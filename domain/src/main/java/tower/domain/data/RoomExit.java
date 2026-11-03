@@ -5,6 +5,7 @@ public class RoomExit {
     private String targetRoomId;
     private String targetFloorId;
     private String label;
+    private String requiresTaken;
 
     public static RoomExit create(String targetRoomId, String label) {
         return new RoomExit(targetRoomId, null, label);
@@ -34,5 +35,17 @@ public class RoomExit {
 
     public String targetRoomId() {
         return targetRoomId;
+    }
+
+    public String requiresTaken() {
+        return requiresTaken;
+    }
+
+    public void setRequiresTaken(String objectId) {
+        if (objectId == null || objectId.isBlank()) {
+            this.requiresTaken = null;
+            return;
+        }
+        this.requiresTaken = objectId;
     }
 }

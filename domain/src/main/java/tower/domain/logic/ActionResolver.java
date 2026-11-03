@@ -130,14 +130,22 @@ public class ActionResolver {
     }
 
     private static void addTakeAction(List<GameAction> actions, GameState state, ObjectDefinition object) {
-        String artifactId = object.artifactId();
-        if (artifactId == null) {
+        if (object.isArtifact()) {
+            if (state.player().isEquipped(object.artifactId()) || !state.player().hasFreeEquipmentSlot()) {
+                return;
+            }
+            actions.add(GameAction.take(object.id(), "Pick up"));
             return;
         }
-        if (state.player().isEquipped(artifactId) || !state.player().hasFreeEquipmentSlot()) {
+        if (object.teachesSpell()) {
+            if (!state.player().knowsSpell(object.spellId())) {
+                actions.add(GameAction.take(object.id(), "Pick up"));
+            }
             return;
         }
-        actions.add(GameAction.take(object.id(), "Pick up"));
+        if (object.isItem() && !state.objectTaken(object.id())) {
+            actions.add(GameAction.take(object.id(), "Pick up"));
+        }
     }
 
     private static void addCastActions(
