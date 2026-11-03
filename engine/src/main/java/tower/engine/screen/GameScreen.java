@@ -19,6 +19,7 @@ import tower.domain.logic.ActionExecutor;
 import tower.domain.logic.ActionResolver;
 import tower.domain.state.GameState;
 import tower.engine.render.ActionPanel;
+import tower.engine.render.GameFonts;
 import tower.engine.render.RoomRenderer;
 
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ public class GameScreen implements Screen {
     private final OrthographicCamera camera = new OrthographicCamera();
     private final ShapeRenderer shapes = new ShapeRenderer();
     private final SpriteBatch batch = new SpriteBatch();
-    private final BitmapFont font = new BitmapFont();
+    private final BitmapFont font = GameFonts.create();
     private String message = "";
     private Mode mode = Mode.ROOM;
 

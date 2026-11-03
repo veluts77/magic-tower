@@ -282,8 +282,10 @@ assets/
 Разрешено:
 
 - `com.badlogicgames.gdx:gdx` (в `engine`)
+- `com.badlogicgames.gdx:gdx-freetype` (в `engine`, кириллица в игровом шрифте)
 - `com.badlogicgames.gdx:gdx-backend-lwjgl3` (в `desktop`)
 - `com.badlogicgames.gdx:gdx-platform` с `natives-desktop` (в `desktop`)
+- `com.badlogicgames.gdx:gdx-freetype-platform` с `natives-desktop` (в `desktop`)
 
 Модуль `domain` не имеет внешних runtime-зависимостей. Разрешены зависимости только в области `testImplementation`,
 в первую очередь JUnit 5 для юнит-тестов. Никаких других новых зависимостей без обоснования.

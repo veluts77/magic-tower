@@ -11,4 +11,5 @@ java {
 dependencies {
     api project(':domain')
     implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
 }

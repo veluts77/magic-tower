@@ -60,7 +60,7 @@ public class RoomRenderer {
         batch.begin();
         String title = room.displayName();
         layout.setText(font, title);
-        font.draw(batch, layout, (screenWidth - layout.width) / 2f, screenHeight - 28f);
+        font.draw(batch, layout, (screenWidth - layout.width) / 2f, screenHeight - 8f - font.getLineHeight());
 
         for (int i = 0; i < objectCount; i++) {
             ObjectDefinition object = objects.get(i);
@@ -73,7 +73,7 @@ public class RoomRenderer {
             }
             layout.setText(font, label);
             float labelX = roomX + slotWidth * i + (slotWidth - layout.width) / 2f;
-            font.draw(batch, layout, labelX, shapeY + shapeSize + 22f);
+            font.draw(batch, layout, labelX, shapeY + shapeSize + font.getLineHeight() + 6f);
         }
 
         font.draw(batch, "room: " + room.id(), 12f, 36f);

@@ -14,7 +14,6 @@ public class ActionPanel {
     private static final float LEFT = 48f;
     private static final float BOTTOM = 56f;
     private static final float GAP = 8f;
-    private static final float LINE = 20f;
 
     private final GlyphLayout layout = new GlyphLayout();
 
@@ -33,16 +32,17 @@ public class ActionPanel {
             return;
         }
         float top = BOTTOM + reservedHeight - GAP;
+        float line = lineHeight(font);
         font.setColor(WHITE);
         batch.begin();
         float baseline = top - font.getCapHeight();
         if (visible(status)) {
             font.draw(batch, status, LEFT, baseline);
-            baseline -= LINE;
+            baseline -= line;
         }
         if (visible(heading)) {
             font.draw(batch, heading, LEFT, baseline);
-            baseline -= LINE;
+            baseline -= line;
         }
         if (visible(message)) {
             layout.setText(font, message, WHITE, width, left, true);
@@ -52,7 +52,7 @@ public class ActionPanel {
         int count = lines == null ? 0 : lines.size();
         for (int i = 0; i < count; i++) {
             font.draw(batch, (i + 1) + ": " + lines.get(i), LEFT, baseline);
-            baseline -= LINE;
+            baseline -= line;
         }
         batch.end();
     }
@@ -66,19 +66,24 @@ public class ActionPanel {
         if (count == 0 && !hasStatus && !hasHeading && !hasMessage) {
             return 0f;
         }
+        float line = lineHeight(font);
         float height = font.getCapHeight() + 4f;
         if (hasStatus) {
-            height += LINE;
+            height += line;
         }
         if (hasHeading) {
-            height += LINE;
+            height += line;
         }
         if (hasMessage) {
             layout.setText(font, message, WHITE, width, left, true);
             height += layout.height + GAP;
         }
-        height += count * LINE;
+        height += count * line;
         return height;
+    }
+
+    private static float lineHeight(BitmapFont font) {
+        return Math.max(font.getLineHeight(), font.getCapHeight() + 6f);
     }
 
     private static boolean visible(String message) {
