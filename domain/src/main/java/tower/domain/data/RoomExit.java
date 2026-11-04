@@ -6,6 +6,7 @@ public class RoomExit {
     private String targetFloorId;
     private String label;
     private String requiresTaken;
+    private String requiresFlag;
 
     public static RoomExit create(String targetRoomId, String label) {
         return new RoomExit(targetRoomId, null, label);
@@ -47,5 +48,17 @@ public class RoomExit {
             return;
         }
         this.requiresTaken = objectId;
+    }
+
+    public String requiresFlag() {
+        return requiresFlag;
+    }
+
+    public void setRequiresFlag(String flagId) {
+        if (flagId == null || flagId.isBlank()) {
+            this.requiresFlag = null;
+            return;
+        }
+        this.requiresFlag = flagId;
     }
 }

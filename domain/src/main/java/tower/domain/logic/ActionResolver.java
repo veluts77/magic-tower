@@ -150,7 +150,7 @@ public class ActionResolver {
 
     private static void addCastActions(
             List<GameAction> actions, GameState state, ObjectDefinition object, List<SpellDefinition> spells) {
-        if (spells == null) {
+        if (spells == null || (object.grantsFlag() != null && state.hasFlag(object.grantsFlag()))) {
             return;
         }
         var seen = new LinkedHashSet<String>();

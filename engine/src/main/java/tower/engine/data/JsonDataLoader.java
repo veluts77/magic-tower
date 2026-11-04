@@ -261,6 +261,7 @@ public class JsonDataLoader implements DataLoader {
             object.setSpellId(text(objectJson, "spell"));
             object.setSpiritId(text(objectJson, "spirit"));
             object.setItemId(text(objectJson, "item"));
+            object.setGrantsFlag(text(objectJson, "grantsFlag"));
             objects.add(object);
         }
         return objects;
@@ -279,6 +280,7 @@ public class JsonDataLoader implements DataLoader {
             }
             RoomExit exit = RoomExit.create(text(exitJson, "targetRoomId"), text(exitJson, "label"));
             exit.setRequiresTaken(text(exitJson, "requiresTaken"));
+            exit.setRequiresFlag(text(exitJson, "requiresFlag"));
             exits.add(exit);
         }
         return exits;

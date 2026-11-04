@@ -15,6 +15,7 @@ public class ObjectDefinition {
     private String spellId;
     private String spiritId;
     private String itemId;
+    private String grantsFlag;
     private List<String> supportedSpells = new ArrayList<>();
 
     public static ObjectDefinition create(String id, String displayName, String type, String description) {
@@ -141,6 +142,14 @@ public class ObjectDefinition {
 
     public boolean isItem() {
         return itemId != null;
+    }
+
+    public String grantsFlag() {
+        return grantsFlag;
+    }
+
+    public void setGrantsFlag(String flagId) {
+        this.grantsFlag = blankToNull(flagId);
     }
 
     private static String blankToNull(String value) {

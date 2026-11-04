@@ -125,12 +125,20 @@ class DustyArchiveTest {
         assertFalse(locked.succeeded);
         assertEquals("The way is locked.", locked.message);
         assertEquals("gatekeeper_cell", state.currentRoomId());
-        assertTrue(resolver.availableActions(state, rooms, "cell_key", spells, creatures).stream()
-                .noneMatch(action -> action.type == TAKE));
+        assertEquals(List.of("ash_slug", "old_chest"), visibleIds(state, rooms, "gatekeeper_cell"));
+        assertTrue(resolver.availableActions(state, rooms, "old_chest", spells, creatures).stream()
+                .noneMatch(action -> action.type == CAST || action.type == TAKE));
 
-        ActionResult blockedKey = run(state, rooms, GameAction.take("cell_key", "Pick up"), floor, next, spells, spirits, artifacts, creatures);
-        assertFalse(blockedKey.succeeded);
-        assertTrue(blockedKey.message.contains("blocks access"));
+        state.selectObject("old_chest");
+        ActionResult blockedLook = run(
+                state, rooms, GameAction.examine("old_chest", "Examine"), floor, next, spells, spirits, artifacts, creatures);
+        assertTrue(blockedLook.succeeded);
+        assertFalse(blockedLook.message.contains("key"));
+        assertFalse(state.hasFlag("gatekeeper_key_found"));
+        ActionResult blockedChest = run(state, rooms, GameAction.cast("push", "Cast: Толчок"), floor, next, spells, spirits, artifacts, creatures);
+        assertFalse(blockedChest.succeeded);
+        assertTrue(blockedChest.message.contains("blocks access"));
+        assertFalse(state.hasFlag("gatekeeper_key_found"));
 
         state.selectObject("ash_slug");
         ActionResult slug = run(state, rooms, GameAction.cast("spark", "Cast: Искра"), floor, next, spells, spirits, artifacts, creatures);
@@ -140,9 +148,16 @@ class DustyArchiveTest {
         assertEquals(6, state.floorState().earnedCount());
         assertTrue(resolver.availableActions(state, rooms, spirits, floor).stream().noneMatch(action -> action.type == ASCEND));
 
-        ActionResult key = run(state, rooms, GameAction.take("cell_key", "Pick up"), floor, next, spells, spirits, artifacts, creatures);
+        ActionResult stillLocked = run(state, rooms, GameAction.move("hidden_cell", "Идти в скрытую келью"), floor, next, spells, spirits, artifacts, creatures);
+        assertFalse(stillLocked.succeeded);
+        assertEquals("The way is locked.", stillLocked.message);
+
+        state.selectObject("old_chest");
+        ActionResult key = run(
+                state, rooms, GameAction.examine("old_chest", "Examine"), floor, next, spells, spirits, artifacts, creatures);
         assertTrue(key.succeeded);
-        assertTrue(key.message.contains("You take Ключ от скрытой кельи."));
+        assertEquals("Старый сундук opens. You find the key.", key.message);
+        assertTrue(state.hasFlag("gatekeeper_key_found"));
         assertEquals(6, state.floorState().earnedCount());
 
         ActionResult hidden = run(state, rooms, GameAction.move("hidden_cell", "Идти в скрытую келью"), floor, next, spells, spirits, artifacts, creatures);
@@ -190,6 +205,38 @@ class DustyArchiveTest {
     }
 
     @Test
+    void examiningTheChestFindsTheKeyWithoutPush() {
+        FloorDefinition floor = archive();
+        List<RoomDefinition> rooms = rooms();
+        List<SpellDefinition> spells = List.of(SpellDefinition.create("spark", "Искра", "Искра.", OBJECT));
+        List<CreatureDefinition> creatures = List.of(CreatureDefinition.create(
+                "ash_slug", "Пепельный слизень", "Слизень.", List.of("spark")));
+        GameState state = GameState.start(floor);
+        state.player().learnSpell("spark");
+        state.enterRoom("gatekeeper_cell");
+
+        assertTrue(resolver.availableActions(state, rooms, "old_chest", spells, creatures).stream()
+                .noneMatch(action -> action.type == CAST));
+        state.selectObject("ash_slug");
+        ActionResult slug = run(
+                state, rooms, GameAction.cast("spark", "Cast: Искра"), floor, floor, spells, List.of(), List.of(), creatures);
+        assertTrue(slug.succeeded);
+
+        List<GameAction> chest = resolver.availableActions(state, rooms, "old_chest", spells, creatures);
+        assertEquals(List.of(EXAMINE), chest.stream().map(action -> action.type).toList());
+        state.selectObject("old_chest");
+        ActionResult key = run(
+                state, rooms, GameAction.examine("old_chest", "Examine"), floor, floor, spells, List.of(), List.of(), creatures);
+        assertEquals("Старый сундук opens. You find the key.", key.message);
+        assertTrue(state.hasFlag("gatekeeper_key_found"));
+
+        ActionResult hidden = run(
+                state, rooms, GameAction.move("hidden_cell", "Идти в скрытую келью"), floor, floor, spells, List.of(), List.of(), creatures);
+        assertTrue(hidden.succeeded);
+        assertEquals("hidden_cell", state.currentRoomId());
+    }
+
+    @Test
     void archiveContentIsInTheFloorFile() throws IOException {
         String floor = asset("assets/data/floors/floor_01_dusty_archive.json");
         String upper = asset("assets/data/floors/floor_02.json");
@@ -220,7 +267,6 @@ class DustyArchiveTest {
                 "quiet_ring",
                 "ancient_folio",
                 "old_chest",
-                "cell_key",
                 "ancient_altar",
                 "seeker_page",
                 "ancient_rune",
@@ -231,16 +277,21 @@ class DustyArchiveTest {
                 "entered_gatekeeper_cell",
                 "neutralized_slug",
                 "summoned_seeker",
-                "found_hidden_rune")) {
+                "found_hidden_rune",
+                "gatekeeper_key_found")) {
             assertTrue(floor.contains("\"" + id + "\""), id);
         }
+        assertFalse(floor.contains("cell_key"));
         int gallery = floor.indexOf("\"id\": \"flooded_gallery\"");
         int cell = floor.indexOf("\"id\": \"gatekeeper_cell\"");
         int hidden = floor.indexOf("\"id\": \"hidden_cell\"");
         assertTrue(floor.indexOf("\"id\": \"entrance_hall\"") < gallery);
         assertFalse(floor.substring(gallery, cell).contains("\"hazard\""));
         assertTrue(floor.substring(cell, hidden).contains("\"hazard\": \"fire\""));
-        assertTrue(floor.substring(cell, hidden).contains("\"requiresTaken\": \"cell_key\""));
+        assertTrue(floor.substring(cell, hidden).contains("\"blockedByCreature\": \"ash_slug\""));
+        assertTrue(floor.substring(cell, hidden).contains("\"supportedSpells\": [\"push\"]"));
+        assertTrue(floor.substring(cell, hidden).contains("\"grantsFlag\": \"gatekeeper_key_found\""));
+        assertTrue(floor.substring(cell, hidden).contains("\"requiresFlag\": \"gatekeeper_key_found\""));
         assertTrue(floor.contains("\"targetFloorId\": \"floor_02\""));
         assertTrue(upper.contains("Этот этаж будет добавлен позже."));
         assertTrue(spark.contains("\"id\": \"spark\""));
@@ -298,15 +349,16 @@ class DustyArchiveTest {
         ring.setArtifactId("ring_of_quiet_flame");
         var slug = ObjectDefinition.create("ash_slug", "Пепельный слизень", "creature", "Слизень.");
         slug.setCreatureId("ash_slug");
-        var key = ObjectDefinition.create("cell_key", "Ключ от скрытой кельи", "key", "Ключ.");
-        key.setItemId("cell_key");
-        key.setBlockedByCreature("ash_slug");
+        var chest = ObjectDefinition.create("old_chest", "Старый сундук", "container", "Сундук.");
+        chest.setBlockedByCreature("ash_slug");
+        chest.setSupportedSpells(List.of("push"));
+        chest.setGrantsFlag("gatekeeper_key_found");
         var page = ObjectDefinition.create("seeker_page", "Страница искателя", "spell", "Страница искателя.");
         page.setSpellId("seeker");
         page.setSpiritId("seeker");
         var rune = ObjectDefinition.create("ancient_rune", "Древняя руна", "clue", "Малая руна в трещине камня.");
         RoomExit toHidden = RoomExit.create("hidden_cell", "Идти в скрытую келью");
-        toHidden.setRequiresTaken("cell_key");
+        toHidden.setRequiresFlag("gatekeeper_key_found");
 
         RoomDefinition entrance = room("entrance_hall", "Прихожая архива", "Прихожая.", List.of(
                 RoomExit.create("map_hall", "Идти в зал карт")));
@@ -320,7 +372,7 @@ class DustyArchiveTest {
         gallery.setObjects(List.of(ring));
         var cell = RoomDefinition.create("gatekeeper_cell", "Келья привратника", "Келья.");
         cell.setHazard(FIRE);
-        cell.setObjects(List.of(slug, key));
+        cell.setObjects(List.of(slug, chest));
         cell.setExits(List.of(RoomExit.create("flooded_gallery", "Вернуться в галерею"), toHidden));
         var hidden = RoomDefinition.create("hidden_cell", "Скрытая келья", "Келья.");
         hidden.setObjects(List.of(page, rune));
@@ -335,6 +387,10 @@ class DustyArchiveTest {
         var defined = RoomDefinition.create(id, name, description);
         defined.setExits(exits);
         return defined;
+    }
+
+    private static List<String> visibleIds(GameState state, List<RoomDefinition> rooms, String roomId) {
+        return state.visibleObjects(room(rooms, roomId)).stream().map(ObjectDefinition::id).toList();
     }
 
     private static RoomDefinition room(List<RoomDefinition> rooms, String id) {

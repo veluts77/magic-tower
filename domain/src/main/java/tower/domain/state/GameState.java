@@ -21,6 +21,7 @@ public class GameState {
     private FloorState floorState = new FloorState();
     private final Map<String, RoomState> roomStates = new LinkedHashMap<>();
     private final Set<String> visitedRoomIds = new LinkedHashSet<>();
+    private final Set<String> flags = new LinkedHashSet<>();
 
     private GameState() {
     }
@@ -51,6 +52,7 @@ public class GameState {
         floorState = new FloorState();
         roomStates.clear();
         visitedRoomIds.clear();
+        flags.clear();
         visitedRoomIds.add(startingRoomId);
     }
 
@@ -128,6 +130,17 @@ public class GameState {
 
     public void takeObject(String objectId) {
         roomState(currentRoomId).markObjectTaken(objectId);
+    }
+
+    public boolean hasFlag(String flagId) {
+        return flagId != null && flags.contains(flagId);
+    }
+
+    public void grantFlag(String flagId) {
+        if (flagId == null || flagId.isBlank()) {
+            throw new IllegalArgumentException("Flag id is missing");
+        }
+        flags.add(flagId);
     }
 
     public boolean creatureNeutralized(String creatureId) {

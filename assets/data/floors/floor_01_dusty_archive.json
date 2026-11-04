@@ -180,7 +180,7 @@
         {
           "targetRoomId": "hidden_cell",
           "label": "Идти в скрытую келью",
-          "requiresTaken": "cell_key"
+          "requiresFlag": "gatekeeper_key_found"
         }
       ],
       "objects": [
@@ -196,15 +196,9 @@
           "displayName": "Старый сундук",
           "type": "container",
           "description": "Крышка в золе. Пока слизень лежит сверху, до ключа внутри не добраться.",
-          "blockedByCreature": "ash_slug"
-        },
-        {
-          "id": "cell_key",
-          "displayName": "Ключ от скрытой кельи",
-          "type": "key",
-          "description": "Холодный железный ключ. Он лежал в сундуке, под слизнем.",
-          "item": "cell_key",
-          "blockedByCreature": "ash_slug"
+          "blockedByCreature": "ash_slug",
+          "supportedSpells": ["push"],
+          "grantsFlag": "gatekeeper_key_found"
         }
       ]
     },

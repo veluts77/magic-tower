@@ -157,6 +157,13 @@ public class ActionExecutor {
             return ActionResult.rejected("That action is not available.");
         }
         ObjectDefinition object = Rooms.findObject(rooms, state.currentRoomId(), available.target);
+        if (object != null && object.grantsFlag() != null && !state.hasFlag(object.grantsFlag())
+                && blockedAccess(state, rooms, object.id(), creatures) == null) {
+            state.grantFlag(object.grantsFlag());
+            String name = object.displayName().isBlank() ? object.id() : object.displayName();
+            ActionResult opened = ActionResult.succeeded(name + " opens. You find the key.");
+            return finish(state, floor, opened, EXAMINE, object.id());
+        }
         String message = descriptionOf(object, creatures);
         if (object != null && LIT.equals(state.objectCondition(object.id()))) {
             message = message + " A small flame burns there now.";
@@ -202,10 +209,23 @@ public class ActionExecutor {
         if (object.isCreature()) {
             return neutralize(state, object, spell, creatures, floor);
         }
+        if (object.grantsFlag() != null && object.supportsSpell(spell.id())) {
+            return openContainer(state, object, floor);
+        }
         if (!SPARK.equals(spell.id())) {
             return ActionResult.rejected("That spell does nothing here.");
         }
         return light(state, object, floor);
+    }
+
+    private ActionResult openContainer(GameState state, ObjectDefinition object, FloorDefinition floor) {
+        if (state.hasFlag(object.grantsFlag())) {
+            return ActionResult.rejected("That action is not available.");
+        }
+        state.grantFlag(object.grantsFlag());
+        String name = object.displayName().isBlank() ? object.id() : object.displayName();
+        ActionResult result = ActionResult.succeeded(name + " opens. You find the key.");
+        return finish(state, floor, result, CAST, object.id());
     }
 
     private ActionResult neutralize(
@@ -439,7 +459,7 @@ public class ActionExecutor {
     private ActionResult move(GameState state, List<RoomDefinition> rooms, GameAction action, FloorDefinition floor) {
         String targetRoomId = action.target;
         RoomExit exit = exitTo(Rooms.find(rooms, state.currentRoomId()), targetRoomId);
-        if (exit != null && exit.requiresTaken() != null && !state.objectTaken(exit.requiresTaken())) {
+        if (exit != null && exitLocked(state, exit)) {
             return ActionResult.rejected("The way is locked.");
         }
         RoomDefinition destination = Rooms.find(rooms, targetRoomId);
@@ -501,6 +521,12 @@ public class ActionExecutor {
         }
         String message = result.message.isBlank() ? extra : result.message + " " + extra;
         return ActionResult.succeeded(message, changes.toArray(ActionResult.Change[]::new));
+    }
+
+    private static boolean exitLocked(GameState state, RoomExit exit) {
+        boolean missingItem = exit.requiresTaken() != null && !state.objectTaken(exit.requiresTaken());
+        boolean missingFlag = exit.requiresFlag() != null && !state.hasFlag(exit.requiresFlag());
+        return missingItem || missingFlag;
     }
 
     private static RoomExit exitTo(RoomDefinition room, String targetRoomId) {
