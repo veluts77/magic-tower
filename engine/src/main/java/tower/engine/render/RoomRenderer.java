@@ -1,6 +1,7 @@
 package tower.engine.render;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -27,6 +28,7 @@ public class RoomRenderer {
     };
 
     private final GlyphLayout layout = new GlyphLayout();
+    private final ObjectSprites sprites = new ObjectSprites();
 
     public void draw(RoomDefinition room, ShapeRenderer shapes, SpriteBatch batch, BitmapFont font,
                      float screenWidth, float screenHeight, float bottomInset, boolean numberObjects,
@@ -47,9 +49,11 @@ public class RoomRenderer {
         float shapeY = roomY + roomHeight * 0.45f;
         for (int i = 0; i < objectCount; i++) {
             ObjectDefinition object = objects.get(i);
-            float shapeX = roomX + slotWidth * i + (slotWidth - shapeSize) / 2f;
+            if (sprites.textureFor(object.id()) != null) {
+                continue;
+            }
             shapes.setColor(lit(object, state) ? LIT_COLOR : OBJECT_COLORS[i % OBJECT_COLORS.length]);
-            shapes.rect(shapeX, shapeY, shapeSize, shapeSize);
+            shapes.rect(shapeX(roomX, slotWidth, i, shapeSize), shapeY, shapeSize, shapeSize);
         }
 
         shapes.setColor(MARKER_COLOR);
@@ -58,6 +62,14 @@ public class RoomRenderer {
 
         font.setColor(WHITE);
         batch.begin();
+        batch.setColor(WHITE);
+        for (int i = 0; i < objectCount; i++) {
+            Texture texture = sprites.textureFor(objects.get(i).id());
+            if (texture == null) {
+                continue;
+            }
+            drawSprite(batch, texture, shapeX(roomX, slotWidth, i, shapeSize), shapeY, shapeSize);
+        }
         String title = room.displayName();
         layout.setText(font, title);
         font.draw(batch, layout, (screenWidth - layout.width) / 2f, screenHeight - 8f - font.getLineHeight());
@@ -79,6 +91,31 @@ public class RoomRenderer {
         font.draw(batch, "room: " + room.id(), 12f, 36f);
         font.draw(batch, "objects: " + objectCount, 12f, 16f);
         batch.end();
+    }
+
+    public void dispose() {
+        sprites.dispose();
+    }
+
+    private static float shapeX(float roomX, float slotWidth, int index, float shapeSize) {
+        return roomX + slotWidth * index + (slotWidth - shapeSize) / 2f;
+    }
+
+    private static void drawSprite(SpriteBatch batch, Texture texture, float boxX, float boxY, float boxSize) {
+        float width = texture.getWidth();
+        float height = texture.getHeight();
+        if (width <= 0f || height <= 0f) {
+            return;
+        }
+        float scale = Math.min(boxSize / width, boxSize / height);
+        float drawWidth = width * scale;
+        float drawHeight = height * scale;
+        batch.draw(
+                texture,
+                boxX + (boxSize - drawWidth) / 2f,
+                boxY + (boxSize - drawHeight) / 2f,
+                drawWidth,
+                drawHeight);
     }
 
     private static List<ObjectDefinition> visibleObjects(RoomDefinition room, GameState state) {
