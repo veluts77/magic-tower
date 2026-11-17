@@ -17,7 +17,11 @@ public class ObjectSprites {
 
     private static final Map<String, String> PATHS = Map.of(
             "lantern", "images/lantern.png",
-            "old_chest", "images/objects/obj_old_chest_closed.png");
+            "old_chest", "images/objects/obj_old_chest_closed.png",
+            "broken_chandelier", "images/objects/obj_broken_chandelier.png",
+            "closed_door", "images/objects/obj_door_closed.png",
+            "ancient_altar", "images/objects/obj_stone_altar.png",
+            "map_table", "images/objects/obj_map_table.png");
 
     private final Map<String, Texture> textures = new LinkedHashMap<>();
 

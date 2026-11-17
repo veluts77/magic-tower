@@ -49,11 +49,11 @@
 
 | sprite_id | category | size | short prompt | canonical destination | status |
 |---|---|---:|---|---|---|
-| `obj_broken_chandelier` | object | `128x128` | broken crystal chandelier lying on stone floor | `assets/images/objects/obj_broken_chandelier.png` | TODO |
-| `obj_door_closed` | object | `128x128` | closed old wooden door with iron hinges | `assets/images/objects/obj_door_closed.png` | TODO |
-| `obj_stone_altar` | object | `128x128` | ancient stone altar carved with faint runes | `assets/images/objects/obj_stone_altar.png` | TODO |
-| `obj_stairs_up` | object | `128x128` | narrow stone staircase leading upward | `assets/images/objects/obj_stairs_up.png` | TODO |
-| `obj_map_table` | object | `128x128` | large wooden table with unfolded old maps | `assets/images/objects/obj_map_table.png` | TODO |
+| `obj_broken_chandelier` | object | `128x128` | broken crystal chandelier lying on stone floor | `assets/images/objects/obj_broken_chandelier.png` | DONE |
+| `obj_door_closed` | object | `128x128` | closed old wooden door with iron hinges | `assets/images/objects/obj_door_closed.png` | DONE |
+| `obj_stone_altar` | object | `128x128` | ancient stone altar carved with faint runes | `assets/images/objects/obj_stone_altar.png` | DONE |
+| `obj_stairs_up` | object | `128x128` | narrow stone staircase leading upward | `assets/images/objects/obj_stairs_up.png` | DONE |
+| `obj_map_table` | object | `128x128` | large wooden table with unfolded old maps | `assets/images/objects/obj_map_table.png` | DONE |
 | `obj_old_chest_closed` | object | `128x128` | old wooden treasure chest, closed, iron bands and lock | `assets/images/objects/obj_old_chest_closed.png` | DONE |
 | `obj_old_chest_open` | object | `128x128` | old wooden treasure chest, open and empty | `assets/images/objects/obj_old_chest_open.png` | TODO |
 | `obj_bookshelf` | object | `128x128` | tall wooden bookshelf filled with dusty books | `assets/images/objects/obj_bookshelf.png` | TODO |
