@@ -1,0 +1,454 @@
+---
+description: Generate Tower Game pixel-art sprites from a short description. Use when the user asks to create, regenerate, or batch-generate game sprites, icons, room backgrounds, characters, creatures, items, or effects.
+alwaysApply: false
+---
+
+# Sprite Generation Skill
+
+Этот skill используется для генерации пиксель-арт спрайтов для проекта Tower Game.
+
+Цель skill:
+
+- получить от пользователя короткое описание спрайта;
+- определить `sprite_id`, категорию, размер и путь назначения;
+- собрать позитивный и негативный промпт;
+- сгенерировать 3 варианта;
+- сохранить варианты в staging-папку `.ai-generated`;
+- не изменять финальные ассеты в `assets/images` без явной команды пользователя.
+
+---
+
+## Project references
+
+Перед генерацией используй эти документы, если они доступны:
+
+- `docs/ART_MANIFEST.md`
+- `docs/ART_STYLE_GUIDE.md`
+- `docs/SPRITE_REQUESTS.md`
+
+Если `sprite_id` уже есть в `docs/SPRITE_REQUESTS.md`, используй его.
+
+Если описание пользователя не найдено в документах, придумай понятный `sprite_id`
+по правилам ниже.
+
+---
+
+## Important existing exception
+
+Файл:
+
+```text
+assets/images/lantern.png
+```
+
+— это временное исключение, созданное до полной нормализации ассетов.
+
+Не перемещай, не переименовывай и не перезаписывай его без явной команды пользователя.
+
+---
+
+## Input contract
+
+Пользователь может передать:
+
+- короткое описание спрайта;
+- необязательный `sprite_id`;
+- необязательную категорию;
+- необязательный размер;
+- необязательное количество вариантов.
+
+Значения по умолчанию:
+
+- количество вариантов: `3`;
+- язык позитивного промпта: английский;
+- пользовательское описание может быть на русском, его нужно перевести в английский subject;
+- варианты сохраняются в `.ai-generated/<sprite_id>/`.
+
+---
+
+## Sprite ID rules
+
+Используй snake_case.
+
+Префиксы:
+
+- `bg_` — фон комнаты;
+- `obj_` — объект комнаты;
+- `item_` — подбираемый предмет;
+- `creature_` — существо;
+- `player_` — персонаж игрока;
+- `spirit_` — дух;
+- `icon_` — UI-иконка;
+- `effect_` — визуальный эффект.
+
+Не используй пробелы и русские символы в `sprite_id`.
+
+Примеры:
+
+```text
+old closed chest -> obj_old_chest_closed
+ash slug -> creature_ash_slug
+spark spell icon -> icon_spell_spark
+hidden rune -> obj_hidden_rune
+```
+
+---
+
+## Categories, sizes and destinations
+
+| Категория | Generation size | Canonical destination |
+|---|---:|---|
+| Room background | `1280x720` | `assets/images/rooms/<sprite_id>.png` |
+| Object | `128x128` | `assets/images/objects/<sprite_id>.png` |
+| Item | `128x128` | `assets/images/items/<sprite_id>.png` |
+| Creature | `128x128` | `assets/images/creatures/<sprite_id>.png` |
+| Player | `128x128` | `assets/images/player/<sprite_id>.png` |
+| Spirit | `128x128` | `assets/images/spirits/<sprite_id>.png` |
+| Effect | `128x128` | `assets/images/effects/<sprite_id>.png` |
+| UI icon | `128x128` | `assets/images/ui/<sprite_id>.png` |
+
+UI-иконки можно генерировать в `128x128`, а позже даунскейлить до `64x64`
+или `32x32` nearest-neighbor.
+
+Если пользователь явно указал другой размер, используй его.
+
+---
+
+## Output locations
+
+Генерируй варианты только в staging-папку:
+
+```text
+.ai-generated/<sprite_id>/1.png
+.ai-generated/<sprite_id>/2.png
+.ai-generated/<sprite_id>/3.png
+```
+
+Не сохраняй результаты сразу в:
+
+```text
+assets/images/
+```
+
+Финальный спрайт выбирает пользователь.
+
+Если пользователь явно попросит promote или копирование выбранного варианта,
+тогда скопируй его в canonical destination.
+
+---
+
+## Camera / viewpoint
+
+По умолчанию для объектов, предметов, существ, персонажей, духов, иконок и эффектов:
+
+- фронтальный вид (`front view`, `front-facing`);
+- ортографическая плоская проекция (`orthographic`, `flat 2D`);
+- без трёхчетвертного ракурса;
+- без изометрии;
+- без вида сверху / снизу / сбоку под углом.
+
+Разрешай другой ракурс только если пользователь явно попросил его в запросе.
+
+Фраза для позитивного промпта:
+
+```text
+front view, front-facing, orthographic, flat 2D
+```
+
+Фраза для негативного промпта:
+
+```text
+three-quarter view, 3/4 view, isometric, axonometric, angled perspective, diagonal view, oblique view, top-down, bird's eye, high angle, low angle, side view, profile view
+```
+
+---
+
+## Required image content
+
+Каждый вариант должен содержать:
+
+- ровно один спрайт;
+- один объект, персонажа, существо, иконку или эффект;
+- центрированную композицию;
+- фронтальный ортографический ракурс, если пользователь не указал иначе;
+- пиксель-арт стиль;
+- чёткие пиксели;
+- без текста;
+- без водяных знаков;
+- без иероглифов;
+- без меню и интерфейсных рамок;
+- без нескольких вариантов внутри одного изображения.
+
+Для объектов, предметов, существ, персонажей, духов, иконок и эффектов:
+
+- фон должен быть прозрачным или идеально чистым белым, пригодным для удаления.
+
+Для фонов комнат:
+
+- прозрачность не нужна;
+- персонажи и существа не нужны.
+
+---
+
+## Positive prompt template: object / item
+
+Используй этот шаблон для объектов и предметов:
+
+```text
+{subject}, single object, centered, front view, front-facing, orthographic, flat 2D, isolated on pure white background, no background, transparent background, pixel art, 16-bit style, SNES RPG aesthetic, crisp pixels, no anti-aliasing, sprite sheet style, game asset, exactly one sprite, not a contact sheet
+```
+
+---
+
+## Positive prompt template: creature
+
+Используй этот шаблон для существ:
+
+```text
+{subject}, single creature, centered, front view, front-facing, orthographic, flat 2D, isolated on pure white background, no background, transparent background, pixel art, 16-bit style, SNES RPG aesthetic, crisp pixels, no anti-aliasing, sprite sheet style, game asset, exactly one sprite, not a contact sheet
+```
+
+---
+
+## Positive prompt template: player
+
+Используй этот шаблон для персонажа игрока:
+
+```text
+{subject}, single full-body character, centered, front view, front-facing, orthographic, flat 2D unless otherwise specified, isolated on pure white background, no background, transparent background, pixel art, 16-bit style, SNES RPG aesthetic, crisp pixels, no anti-aliasing, sprite sheet style, game asset, exactly one sprite, not a contact sheet
+```
+
+---
+
+## Positive prompt template: spirit
+
+Используй этот шаблон для духов:
+
+```text
+{subject}, single ethereal creature, centered, front view, front-facing, orthographic, flat 2D, floating pose, isolated on pure white background, no background, transparent background, pixel art, 16-bit style, SNES RPG aesthetic, crisp pixels, no anti-aliasing, sprite sheet style, game asset, exactly one sprite, not a contact sheet
+```
+
+---
+
+## Positive prompt template: effect
+
+Используй этот шаблон для эффектов:
+
+```text
+{subject}, single magical effect, centered, front view, front-facing, orthographic, flat 2D, isolated on pure white background, no background, transparent background, pixel art, 16-bit style, SNES RPG aesthetic, crisp pixels, no anti-aliasing, game asset, exactly one sprite, not a contact sheet
+```
+
+---
+
+## Positive prompt template: UI icon
+
+Используй этот шаблон для UI-иконок:
+
+```text
+{subject}, simple centered game icon, front view, front-facing, orthographic, flat 2D, isolated on pure white background, no background, transparent background, pixel art, 16-bit style, SNES RPG aesthetic, crisp pixels, no anti-aliasing, readable at small size, game asset, exactly one icon, not a contact sheet, no text, no frame
+```
+
+---
+
+## Positive prompt template: room background
+
+Используй этот шаблон для фонов комнат:
+
+```text
+{subject}, front-facing interior room background for a 2D adventure game, dark gothic stone archive, atmospheric lighting, pixel art, 16-bit style, SNES RPG aesthetic, crisp pixels, no anti-aliasing, game background asset, no characters, no creatures, no text, no UI, no frame, no border
+```
+
+Для фонов комнат не используй слова:
+
+```text
+isolated on pure white background
+transparent background
+no background
+```
+
+Потому что фон комнаты должен заполнять изображение.
+
+---
+
+## Negative prompt template: object / item
+
+```text
+blurry, smooth, gradient, 3D render, photo, realistic, background, scenery, text, watermark, signature, letters, characters, hieroglyphs, chinese, japanese, korean, menu, ui, interface, hud, frame, border, anti-aliased, soft edges, detailed background, environment, landscape, multiple objects, contact sheet, multiple variants, crowd, people, animals, hands, fingers, deformed, ugly, bad anatomy, low quality, three-quarter view, 3/4 view, isometric, axonometric, angled perspective, diagonal view, oblique view, top-down, bird's eye, high angle, low angle, side view, profile view
+```
+
+---
+
+## Negative prompt template: creature
+
+```text
+blurry, smooth, gradient, 3D render, photo, realistic, background, scenery, text, watermark, signature, letters, hieroglyphs, chinese, japanese, korean, menu, ui, interface, hud, frame, border, anti-aliased, soft edges, detailed background, environment, landscape, multiple creatures, contact sheet, multiple variants, crowd, people, cute, friendly, deformed, ugly, bad anatomy, low quality, three-quarter view, 3/4 view, isometric, axonometric, angled perspective, diagonal view, oblique view, top-down, bird's eye, high angle, low angle, side view, profile view
+```
+
+---
+
+## Negative prompt template: player
+
+```text
+blurry, smooth, gradient, 3D render, photo, realistic, background, scenery, text, watermark, signature, letters, hieroglyphs, chinese, japanese, korean, menu, ui, interface, hud, frame, border, anti-aliased, soft edges, detailed background, environment, landscape, multiple characters, contact sheet, multiple variants, crowd, deformed, ugly, bad anatomy, extra limbs, low quality, three-quarter view, 3/4 view, isometric, axonometric, angled perspective, diagonal view, oblique view, top-down, bird's eye, high angle, low angle, side view, profile view
+```
+
+---
+
+## Negative prompt template: spirit
+
+```text
+blurry, smooth, gradient, 3D render, photo, realistic, background, scenery, text, watermark, signature, letters, hieroglyphs, chinese, japanese, korean, menu, ui, interface, hud, frame, border, anti-aliased, soft edges, detailed background, environment, landscape, multiple characters, contact sheet, multiple variants, crowd, deformed, ugly, bad anatomy, extra limbs, low quality, three-quarter view, 3/4 view, isometric, axonometric, angled perspective, diagonal view, oblique view, top-down, bird's eye, high angle, low angle, side view, profile view
+```
+
+---
+
+## Negative prompt template: effect
+
+```text
+blurry, smooth, gradient, 3D render, photo, realistic, background, scenery, text, watermark, signature, letters, hieroglyphs, chinese, japanese, korean, menu, ui, interface, hud, frame, border, anti-aliased, soft edges, detailed background, environment, landscape, multiple effects, contact sheet, multiple variants, crowd, people, animals, deformed, ugly, low quality, three-quarter view, 3/4 view, isometric, axonometric, angled perspective, diagonal view, oblique view, top-down, bird's eye, high angle, low angle, side view, profile view
+```
+
+---
+
+## Negative prompt template: UI icon
+
+```text
+blurry, smooth, gradient, 3D render, photo, realistic, background, scenery, text, watermark, signature, letters, hieroglyphs, chinese, japanese, korean, full menu, full interface, hud, frame, border, anti-aliased, soft edges, multiple objects, contact sheet, multiple variants, crowd, people, low quality, three-quarter view, 3/4 view, isometric, axonometric, angled perspective, diagonal view, oblique view, top-down, bird's eye, high angle, low angle, side view, profile view
+```
+
+---
+
+## Negative prompt template: room background
+
+```text
+blurry, smooth, gradient, 3D render, photo, realistic, text, watermark, signature, letters, hieroglyphs, chinese, japanese, korean, menu, ui, interface, hud, frame, border, anti-aliased, soft edges, characters, people, creatures, player, wizard, modern objects, contact sheet, multiple variants, low quality
+```
+
+Для фонов комнат не используй в негативном промпте слова:
+
+```text
+background
+scenery
+environment
+landscape
+```
+
+Потому что фон комнаты является целью генерации.
+
+---
+
+## Generation workflow
+
+Когда пользователь просит сгенерировать спрайт:
+
+1. Определи `sprite_id`.
+2. Определи категорию.
+3. Определи размер.
+4. Определи canonical destination.
+5. Составь английский `{subject}` из короткого описания пользователя.
+6. Выбери позитивный шаблон по категории.
+7. Выбери негативный шаблон по категории.
+8. Создай папку:
+
+```text
+.ai-generated/<sprite_id>/
+```
+
+9. Сгенерируй 3 варианта.
+10. Сохрани их как:
+
+```text
+.ai-generated/<sprite_id>/1.png
+.ai-generated/<sprite_id>/2.png
+.ai-generated/<sprite_id>/3.png
+```
+
+11. Не изменяй файлы в `assets/images/` автоматически.
+12. Сообщи пользователю пути и canonical destination.
+
+Если инструмент генерации изображений недоступен, честно скажи об этом.
+Не делай вид, что изображения созданы.
+
+---
+
+## Prompt wrapper
+
+Используй формат, похожий на этот:
+
+```text
+Создай изображение, которое я мог бы использовать в качестве спрайта для игры, а именно {short description}. Размер спрайта {width}x{height}. Сделай 3 варианта, из которых я мог бы выбрать. Сохрани варианты в папку .ai-generated/{sprite_id} с именами 1-3 (png).
+
+Позитивный промпт:
+"{positive_prompt}"
+
+Негативный промпт:
+"{negative_prompt}"
+```
+
+---
+
+## Quality checklist
+
+После генерации проверь каждый вариант:
+
+- ровно один предмет в кадре;
+- нет нескольких вариантов внутри одного изображения;
+- нет текста;
+- нет иероглифов;
+- нет водяных знаков;
+- нет меню или рамок;
+- нет лишнего фона для объектов;
+- ракурс фронтальный, без three-quarter / isometric;
+- пиксели выглядят чётко;
+- стиль соответствует 16-bit pixel art;
+- изображение центрировано.
+
+Если какой-то вариант содержит несколько объектов, текст, интерфейс
+или трёхчетвертной / изометрический ракурс без явного запроса,
+отметь его как неудачный и, если возможно, перегенерируй.
+
+---
+
+## Batch mode
+
+Если пользователь просит сгенерировать несколько спрайтов:
+
+1. Открой `docs/SPRITE_REQUESTS.md`.
+2. Выбери строки со статусом `TODO`.
+3. Обрабатывай не более 5 спрайтов за один проход, если пользователь не попросил иначе.
+4. Для каждого спрайта создавай отдельную папку:
+
+```text
+.ai-generated/<sprite_id>/
+```
+
+5. После завершения покажи таблицу:
+
+```text
+sprite_id | variants | canonical destination | notes
+```
+
+Не помечай статус `DONE` в `docs/SPRITE_REQUESTS.md` автоматически,
+пока пользователь не выбрал финальный вариант.
+
+---
+
+## Report format
+
+После выполнения покажи краткий отчёт:
+
+```text
+Generated sprites:
+
+1. sprite_id:
+   - .ai-generated/<sprite_id>/1.png
+   - .ai-generated/<sprite_id>/2.png
+   - .ai-generated/<sprite_id>/3.png
+   canonical destination:
+   - assets/images/<category>/<sprite_id>.png
+
+Notes:
+- какие варианты выглядят лучше;
+- есть ли белый фон вместо прозрачности;
+- есть ли артефакты.
+```

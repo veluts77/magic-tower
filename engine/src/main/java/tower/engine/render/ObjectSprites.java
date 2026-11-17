@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static com.badlogic.gdx.graphics.Texture.TextureFilter.Nearest;
@@ -12,31 +14,34 @@ import static java.util.logging.Level.WARNING;
 public class ObjectSprites {
 
     private static final Logger LOG = Logger.getLogger(ObjectSprites.class.getName());
-    private static final String LANTERN_ID = "lantern";
-    private static final String LANTERN_PATH = "images/lantern.png";
 
-    private Texture lantern;
+    private static final Map<String, String> PATHS = Map.of(
+            "lantern", "images/lantern.png",
+            "old_chest", "images/objects/obj_old_chest_closed.png");
+
+    private final Map<String, Texture> textures = new LinkedHashMap<>();
 
     public ObjectSprites() {
-        lantern = load(LANTERN_PATH);
+        for (var entry : PATHS.entrySet()) {
+            Texture texture = load(entry.getKey(), entry.getValue());
+            if (texture != null) {
+                textures.put(entry.getKey(), texture);
+            }
+        }
     }
 
     public Texture textureFor(String objectId) {
-        if (LANTERN_ID.equals(objectId)) {
-            return lantern;
-        }
-        return null;
+        return textures.get(objectId);
     }
 
     public void dispose() {
-        if (lantern == null) {
-            return;
+        for (Texture texture : textures.values()) {
+            texture.dispose();
         }
-        lantern.dispose();
-        lantern = null;
+        textures.clear();
     }
 
-    private static Texture load(String path) {
+    private static Texture load(String objectId, String path) {
         if (Gdx.files == null) {
             warn(path + " is unavailable; drawing placeholder", null);
             return null;
@@ -50,7 +55,7 @@ public class ObjectSprites {
             var texture = new Texture(file);
             texture.setFilter(Nearest, Nearest);
             if (Gdx.app != null) {
-                Gdx.app.log("ObjectSprites", "Loaded " + path + " for " + LANTERN_ID);
+                Gdx.app.log("ObjectSprites", "Loaded " + path + " for " + objectId);
             }
             return texture;
         } catch (RuntimeException ex) {
