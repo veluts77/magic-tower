@@ -37,11 +37,12 @@
 
 | sprite_id | category | size | short prompt | canonical destination | status |
 |---|---|---:|---|---|---|
-| `bg_entrance_hall` | room | `1280x720` | dusty archive entrance hall, cracked stone floor, broken chandelier lying on floor, cobwebs, small dim window, old wooden door | `assets/images/rooms/bg_entrance_hall.png` | TODO |
-| `bg_map_hall` | room | `1280x720` | archive map hall, large wooden table with unfolded old maps, bookshelves, stone walls, warm dim magical lantern light | `assets/images/rooms/bg_map_hall.png` | TODO |
-| `bg_flooded_gallery` | room | `1280x720` | flooded stone gallery, floor partly covered with glowing orange magical dust, tall columns, dark gothic archive | `assets/images/rooms/bg_flooded_gallery.png` | TODO |
-| `bg_gatekeeper_cell` | room | `1280x720` | small gatekeeper cell, rough stone walls, old chest in corner, iron-banded door, dim shadows | `assets/images/rooms/bg_gatekeeper_cell.png` | TODO |
-| `bg_hidden_cell` | room | `1280x720` | hidden ritual cell, ancient stone altar, glowing blue runes, narrow staircase upward, mystical darkness | `assets/images/rooms/bg_hidden_cell.png` | TODO |
+| `bg_entrance_hall` | room | `1280x720` | empty room shell for entrance hall | `assets/room_backgrounds/bg_entrance_hall.png` | DONE |
+| `bg_map_hall` | room | `1280x720` | empty room shell for map hall | `assets/room_backgrounds/bg_map_hall.png` | DONE |
+| `bg_flooded_gallery` | room | `1280x720` | empty room shell for flooded gallery | `assets/room_backgrounds/bg_flooded_gallery.png` | DONE |
+| `bg_gatekeeper_cell` | room | `1280x720` | empty room shell for gatekeeper cell | `assets/room_backgrounds/bg_gatekeeper_cell.png` | DONE |
+| `bg_hidden_cell` | room | `1280x720` | empty room shell for hidden cell | `assets/room_backgrounds/bg_hidden_cell.png` | DONE |
+| `bg_empty_landing` | room | `1280x720` | empty room shell for floor 2 landing | `assets/room_backgrounds/bg_empty_landing.png` | DONE |
 
 ---
 

@@ -190,6 +190,69 @@ three-quarter view, 3/4 view, isometric, axonometric, angled perspective, diagon
 
 ---
 
+## Room background style
+
+Фоны комнат должны сочетаться с отдельными спрайтами объектов/персонажей.
+
+### Canon room geometry
+
+Канон геометрии и текстуры комнаты:
+
+```text
+.ai-generated/bg_empty_cell/1.png
+```
+
+Базовые пустые канон-варианты хранить в:
+
+```text
+.ai-generated/canon/1.png ... 10.png
+```
+
+Правила канона:
+
+- сохраняй те же пропорции комнаты, что у канона: задняя стена, левая стена, правая стена, пол;
+- сохраняй тот же ракурс и ту же глубину пола;
+- геометрия должна быть **симметричной**: левая и правая стены одинаково видимы, задняя стена по центру, vanishing point по центру; не обрезай левую стену сильнее правой;
+- по умолчанию канон-фон — **пустой shell без дверей и окон**: только стены и пол;
+- двери, окна, сундуки, столы, алтари, факелы и прочие props добавляются позже отдельными спрайтами поверх фона;
+- геометрию комнаты между вариантами не меняй;
+- между вариантами diversify паттерны: разный размер/укладка камня на стенах, другой паттерн пола (плиты, кирпич, трещины), а не только перекраска одной и той же текстуры;
+- если пользователь просит filled room background, всё равно держи геометрию канона и мелкий масштаб props.
+
+При генерации канон-фонов всегда передавай reference image:
+
+```text
+.ai-generated/bg_empty_cell/1.png
+```
+
+### Default room look
+
+По умолчанию:
+
+- стиль строго `SNES RPG` / `16-bit pixel art`, как у object-спрайтов;
+- простая, читаемая графика: крупные пиксели, ограниченная палитра, мало деталей;
+- светлее и яснее, чем «тёмное dungeon concept art»;
+- средняя яркость: хорошо видны стены и пол, спрайты поверх не тонут в черноте;
+- ракурс и пропорции — как у канона `.ai-generated/bg_empty_cell/1.png`;
+- комната должна выглядеть просторной: большой пустой пол для размещения спрайтов;
+- по умолчанию генерируй **пустой shell** комнаты: стены и пол без дверей/окон/мебели;
+- не встраивай крупную мебель и props (сундук, стол, алтарь, люстра, факел, книги на полу), если пользователь явно не попросил filled-вариант;
+- если props всё же нужны, они должны быть заметно мельче масштаба комнаты.
+
+Фразы для позитивного промпта фонов:
+
+```text
+same room geometry and camera as reference, same wall and floor proportions, empty stone room shell, solid walls no door no window, large empty floor space for overlay sprites, no furniture, no props, bright enough readable lighting, medium-bright SNES palette, simple low-detail 16-bit pixel art, chunky pixels, limited color palette, SNES RPG room background
+```
+
+Фразы для негативного промпта фонов:
+
+```text
+different room layout, changed camera angle, different proportions, door, window, archway opening, too dark, pitch black, heavy vignette, murky underexposed, hyper detailed, painterly, realistic stone texture, cluttered furniture, oversized props, chest, table, altar, chandelier, torch, bookshelf clutter, concept art, cinematic lighting
+```
+
+---
+
 ## Positive prompt template: object / item
 
 Используй этот шаблон для объектов и предметов:
@@ -255,7 +318,7 @@ three-quarter view, 3/4 view, isometric, axonometric, angled perspective, diagon
 Используй этот шаблон для фонов комнат:
 
 ```text
-{subject}, front-facing interior room background for a 2D adventure game, dark gothic stone archive, atmospheric lighting, pixel art, 16-bit style, SNES RPG aesthetic, crisp pixels, no anti-aliasing, game background asset, no characters, no creatures, no text, no UI, no frame, no border
+{subject}, same room geometry and camera as reference, same wall and floor proportions, empty stone room shell, solid walls no door no window, large empty floor space for overlay sprites, no furniture, no props, bright enough readable lighting, medium-bright SNES palette, simple low-detail 16-bit pixel art, chunky pixels, limited color palette, SNES RPG aesthetic, crisp pixels, no anti-aliasing, game background asset, no characters, no creatures, no text, no UI, no frame, no border
 ```
 
 Для фонов комнат не используй слова:
@@ -267,6 +330,8 @@ no background
 ```
 
 Потому что фон комнаты должен заполнять изображение.
+
+Не делай фон слишком тёмным: спрайты объектов и персонажей должны читаться поверх комнаты.
 
 ---
 
@@ -321,7 +386,7 @@ blurry, smooth, gradient, 3D render, photo, realistic, background, scenery, text
 ## Negative prompt template: room background
 
 ```text
-blurry, smooth, gradient, 3D render, photo, realistic, text, watermark, signature, letters, hieroglyphs, chinese, japanese, korean, menu, ui, interface, hud, frame, border, anti-aliased, soft edges, characters, people, creatures, player, wizard, modern objects, contact sheet, multiple variants, low quality
+blurry, smooth, gradient, 3D render, photo, realistic, text, watermark, signature, letters, hieroglyphs, chinese, japanese, korean, menu, ui, interface, hud, frame, border, anti-aliased, soft edges, characters, people, creatures, player, wizard, modern objects, contact sheet, multiple variants, low quality, different room layout, changed camera angle, different proportions, door, window, archway opening, too dark, pitch black, heavy vignette, murky underexposed, hyper detailed, painterly, realistic stone texture, cluttered furniture, oversized props, chest, table, altar, chandelier, torch, bookshelf clutter, concept art, cinematic lighting
 ```
 
 Для фонов комнат не используй в негативном промпте слова:
@@ -400,11 +465,22 @@ landscape
 - нет лишнего фона для объектов;
 - ракурс фронтальный, без three-quarter / isometric;
 - пиксели выглядят чётко;
-- стиль соответствует 16-bit pixel art;
+- стиль соответствует 16-bit / SNES RPG pixel art;
 - изображение центрировано.
 
-Если какой-то вариант содержит несколько объектов, текст, интерфейс
-или трёхчетвертной / изометрический ракурс без явного запроса,
+Для фонов комнат дополнительно проверь:
+
+- фон достаточно светлый и читаемый, не уходит в почти чёрный;
+- стиль близок к SNES RPG и сможет сочетаться со спрайтами объектов;
+- геометрия совпадает с каноном `.ai-generated/bg_empty_cell/1.png`;
+- комната выглядит как пустой shell, если не просили filled-вариант;
+- нет дверей и окон в канон-empty вариантах;
+- нет крупной встроенной мебели и props;
+- пол достаточно просторный для overlay-спрайтов.
+
+Если какой-то вариант содержит несколько объектов, текст, интерфейс,
+трёхчетвертной / изометрический ракурс без явного запроса,
+слишком тёмный фон комнаты или лишние крупные props,
 отметь его как неудачный и, если возможно, перегенерируй.
 
 ---

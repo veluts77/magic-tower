@@ -29,6 +29,7 @@ public class RoomRenderer {
 
     private final GlyphLayout layout = new GlyphLayout();
     private final ObjectSprites sprites = new ObjectSprites();
+    private final RoomBackgrounds backgrounds = new RoomBackgrounds();
 
     public void draw(RoomDefinition room, ShapeRenderer shapes, SpriteBatch batch, BitmapFont font,
                      float screenWidth, float screenHeight, float bottomInset, boolean numberObjects,
@@ -38,9 +39,19 @@ public class RoomRenderer {
         float roomWidth = screenWidth - 96f;
         float roomHeight = screenHeight - 128f - bottomInset;
 
+        Texture background = backgrounds.textureFor(room == null ? null : room.id());
+        if (background != null) {
+            batch.begin();
+            batch.setColor(WHITE);
+            batch.draw(background, roomX, roomY, roomWidth, roomHeight);
+            batch.end();
+        }
+
         shapes.begin(Filled);
-        shapes.setColor(ROOM_COLOR);
-        shapes.rect(roomX, roomY, roomWidth, roomHeight);
+        if (background == null) {
+            shapes.setColor(ROOM_COLOR);
+            shapes.rect(roomX, roomY, roomWidth, roomHeight);
+        }
 
         List<ObjectDefinition> objects = visibleObjects(room, state);
         int objectCount = objects.size();
@@ -95,6 +106,7 @@ public class RoomRenderer {
 
     public void dispose() {
         sprites.dispose();
+        backgrounds.dispose();
     }
 
     private static float shapeX(float roomX, float slotWidth, int index, float shapeSize) {
