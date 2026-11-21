@@ -56,11 +56,11 @@
 | `obj_stairs_up` | object | `128x128` | narrow stone staircase leading upward | `assets/images/objects/obj_stairs_up.png` | DONE |
 | `obj_map_table` | object | `128x128` | large wooden table with unfolded old maps | `assets/images/objects/obj_map_table.png` | DONE |
 | `obj_old_chest_closed` | object | `128x128` | old wooden treasure chest, closed, iron bands and lock | `assets/images/objects/obj_old_chest_closed.png` | DONE |
-| `obj_old_chest_open` | object | `128x128` | old wooden treasure chest, open and empty | `assets/images/objects/obj_old_chest_open.png` | TODO |
-| `obj_bookshelf` | object | `128x128` | tall wooden bookshelf filled with dusty books | `assets/images/objects/obj_bookshelf.png` | TODO |
-| `obj_magic_lantern_lit` | object | `128x128` | magic lantern on a stand, brighter glowing warm light inside, ornate metalwork | `assets/images/objects/obj_magic_lantern_lit.png` | OPTIONAL |
-| `obj_ancient_folio` | object | `128x128` | ancient leather-bound folio with metal clasp | `assets/images/objects/obj_ancient_folio.png` | TODO |
-| `obj_hidden_rune` | object | `128x128` | glowing blue magical rune carved in stone wall | `assets/images/objects/obj_hidden_rune.png` | TODO |
+| `obj_old_chest_open` | object | `128x128` | old wooden treasure chest, open and empty | `assets/images/objects/obj_old_chest_open.png` | DONE |
+| `obj_bookshelf` | object | `128x128` | tall wooden bookshelf filled with dusty books | `assets/images/objects/obj_bookshelf.png` | DONE |
+| `obj_magic_lantern_lit` | object | `128x128` | magic lantern on a stand, brighter glowing warm light inside, ornate metalwork | `assets/images/objects/obj_magic_lantern_lit.png` | DONE |
+| `obj_ancient_folio` | object | `128x128` | ancient leather-bound folio with metal clasp | `assets/images/objects/obj_ancient_folio.png` | DONE |
+| `obj_hidden_rune` | object | `128x128` | glowing blue magical rune carved in stone wall | `assets/images/objects/obj_hidden_rune.png` | DONE |
 
 ---
 
@@ -68,10 +68,10 @@
 
 | sprite_id | category | size | short prompt | canonical destination | status |
 |---|---|---:|---|---|---|
-| `item_spell_scroll_spark` | item | `128x128` | rolled spell scroll with orange wax seal and simple embossed spark symbol, no letters | `assets/images/items/item_spell_scroll_spark.png` | TODO |
-| `item_spell_scroll_push` | item | `128x128` | rolled spell scroll with blue wax seal and simple embossed wave symbol, no letters | `assets/images/items/item_spell_scroll_push.png` | TODO |
-| `item_spell_scroll_seeker` | item | `128x128` | rolled spell scroll with green wax seal and simple embossed eye symbol, no letters | `assets/images/items/item_spell_scroll_seeker.png` | TODO |
-| `item_artifact_ring_fire` | item | `128x128` | simple metal ring with small glowing red gem | `assets/images/items/item_artifact_ring_fire.png` | TODO |
+| `item_spell_scroll_spark` | item | `128x128` | rolled spell scroll with orange wax seal and simple embossed spark symbol, no letters | `assets/images/items/item_spell_scroll_spark.png` | DONE |
+| `item_spell_scroll_push` | item | `128x128` | rolled spell scroll with blue wax seal and simple embossed wave symbol, no letters | `assets/images/items/item_spell_scroll_push.png` | DONE |
+| `item_spell_scroll_seeker` | item | `128x128` | rolled spell scroll with green wax seal and simple embossed eye symbol, no letters | `assets/images/items/item_spell_scroll_seeker.png` | DONE |
+| `item_artifact_ring_fire` | item | `128x128` | simple metal ring with small glowing red gem | `assets/images/items/item_artifact_ring_fire.png` | DONE |
 
 ---
 
@@ -79,8 +79,8 @@
 
 | sprite_id | category | size | short prompt | canonical destination | status |
 |---|---|---:|---|---|---|
-| `creature_ash_slug` | creature | `128x128` | ashen gray slug-like monster, amorphous body, faint ember glow, menacing but slow | `assets/images/creatures/creature_ash_slug.png` | TODO |
-| `creature_ash_slug_neutralized` | creature | `128x128` | deflated ashen gray slug remains, no glow | `assets/images/creatures/creature_ash_slug_neutralized.png` | OPTIONAL |
+| `creature_ash_slug` | creature | `128x128` | ashen gray slug-like monster, amorphous body, faint ember glow, menacing but slow | `assets/images/creatures/creature_ash_slug.png` | DONE |
+| `creature_ash_slug_neutralized` | creature | `128x128` | deflated ashen gray slug remains, no glow | `assets/images/creatures/creature_ash_slug_neutralized.png` | DONE |
 
 ---
 
@@ -88,8 +88,8 @@
 
 | sprite_id | category | size | short prompt | canonical destination | status |
 |---|---|---:|---|---|---|
-| `player_idle` | player | `128x128` | apprentice wizard in dark blue hooded robe, holding wooden staff, calm front-facing standing pose | `assets/images/player/player_idle.png` | TODO |
-| `player_walk_sheet` | player | `128x128` | four-frame walking animation of apprentice wizard in dark blue hooded robe, sprite sheet, horizontal strip | `assets/images/player/player_walk_sheet.png` | OPTIONAL |
+| `player_idle` | player | `128x128` | apprentice wizard in dark blue hooded robe, holding wooden staff, calm front-facing standing pose | `assets/images/player/player_idle.png` | DONE |
+| `player_walk_sheet` | player | `128x128` | four-frame walking animation of apprentice wizard in dark blue hooded robe, sprite sheet, horizontal strip | `assets/images/player/player_walk_sheet.png` | DONE |
 
 ---
 
@@ -97,7 +97,7 @@
 
 | sprite_id | category | size | short prompt | canonical destination | status |
 |---|---|---:|---|---|---|
-| `spirit_seeker` | spirit | `128x128` | translucent floating seeker spirit, glowing green eyes, wispy ethereal body, magical aura | `assets/images/spirits/spirit_seeker.png` | TODO |
+| `spirit_seeker` | spirit | `128x128` | translucent floating seeker spirit, glowing green eyes, wispy ethereal body, magical aura | `assets/images/spirits/spirit_seeker.png` | DONE |
 
 ---
 
@@ -105,16 +105,16 @@
 
 | sprite_id | category | size | short prompt | canonical destination | status |
 |---|---|---:|---|---|---|
-| `icon_spell_spark` | ui | `128x128` | orange magical spark burst icon | `assets/images/ui/icon_spell_spark.png` | TODO |
-| `icon_spell_push` | ui | `128x128` | blue kinetic push wave icon | `assets/images/ui/icon_spell_push.png` | TODO |
-| `icon_spell_seeker` | ui | `128x128` | green all-seeing spirit eye icon | `assets/images/ui/icon_spell_seeker.png` | TODO |
-| `icon_action_look` | ui | `128x128` | simple eye icon | `assets/images/ui/icon_action_look.png` | TODO |
-| `icon_action_search` | ui | `128x128` | simple magnifying glass icon | `assets/images/ui/icon_action_search.png` | TODO |
-| `icon_action_move` | ui | `128x128` | simple doorway arrow icon | `assets/images/ui/icon_action_move.png` | TODO |
-| `icon_action_pick_up` | ui | `128x128` | simple open hand taking item icon | `assets/images/ui/icon_action_pick_up.png` | TODO |
-| `icon_action_ascend` | ui | `128x128` | simple upward staircase arrow icon | `assets/images/ui/icon_action_ascend.png` | TODO |
-| `icon_mastery_mark_empty` | ui | `128x128` | empty circular mastery seal with rune, dark gray | `assets/images/ui/icon_mastery_mark_empty.png` | TODO |
-| `icon_mastery_mark_filled` | ui | `128x128` | filled golden circular mastery seal with glowing rune | `assets/images/ui/icon_mastery_mark_filled.png` | TODO |
+| `icon_spell_spark` | ui | `128x128` | orange magical spark burst icon | `assets/images/ui/icon_spell_spark.png` | DONE |
+| `icon_spell_push` | ui | `128x128` | blue kinetic push wave icon | `assets/images/ui/icon_spell_push.png` | DONE |
+| `icon_spell_seeker` | ui | `128x128` | green all-seeing spirit eye icon | `assets/images/ui/icon_spell_seeker.png` | DONE |
+| `icon_action_look` | ui | `128x128` | simple eye icon | `assets/images/ui/icon_action_look.png` | DONE |
+| `icon_action_search` | ui | `128x128` | simple magnifying glass icon | `assets/images/ui/icon_action_search.png` | DONE |
+| `icon_action_move` | ui | `128x128` | simple doorway arrow icon | `assets/images/ui/icon_action_move.png` | DONE |
+| `icon_action_pick_up` | ui | `128x128` | simple open hand taking item icon | `assets/images/ui/icon_action_pick_up.png` | DONE |
+| `icon_action_ascend` | ui | `128x128` | simple upward staircase arrow icon | `assets/images/ui/icon_action_ascend.png` | DONE |
+| `icon_mastery_mark_empty` | ui | `128x128` | empty circular mastery seal with rune, dark gray | `assets/images/ui/icon_mastery_mark_empty.png` | DONE |
+| `icon_mastery_mark_filled` | ui | `128x128` | filled golden circular mastery seal with glowing rune | `assets/images/ui/icon_mastery_mark_filled.png` | DONE |
 
 ---
 
@@ -122,6 +122,6 @@
 
 | sprite_id | category | size | short prompt | canonical destination | status |
 |---|---|---:|---|---|---|
-| `effect_spark` | effect | `128x128` | small orange magical spark burst | `assets/images/effects/effect_spark.png` | OPTIONAL |
-| `effect_push` | effect | `128x128` | blue magical push shockwave | `assets/images/effects/effect_push.png` | OPTIONAL |
-| `effect_summon` | effect | `128x128` | green circular summoning glyph with floating motes | `assets/images/effects/effect_summon.png` | OPTIONAL |
+| `effect_spark` | effect | `128x128` | small orange magical spark burst | `assets/images/effects/effect_spark.png` | DONE |
+| `effect_push` | effect | `128x128` | blue magical push shockwave | `assets/images/effects/effect_push.png` | DONE |
+| `effect_summon` | effect | `128x128` | green circular summoning glyph with floating motes | `assets/images/effects/effect_summon.png` | DONE |

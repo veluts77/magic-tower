@@ -47,39 +47,53 @@ public class RoomRenderer {
             batch.end();
         }
 
+        List<ObjectDefinition> objects = visibleObjects(room, state);
+        int objectCount = objects.size();
+        float shapeSize = 56f;
+        float slotWidth = objectCount == 0 ? 0f : roomWidth / objectCount;
+        float shapeY = roomY + roomHeight * 0.45f;
+        float markerX = roomX + 40f;
+        float markerY = roomY + 36f;
+        float markerSize = 48f;
+        Texture player = sprites.textureFor("player");
+        Texture spirit = summonedSpirit(state);
+
         shapes.begin(Filled);
         if (background == null) {
             shapes.setColor(ROOM_COLOR);
             shapes.rect(roomX, roomY, roomWidth, roomHeight);
         }
 
-        List<ObjectDefinition> objects = visibleObjects(room, state);
-        int objectCount = objects.size();
-        float shapeSize = 56f;
-        float slotWidth = objectCount == 0 ? 0f : roomWidth / objectCount;
-        float shapeY = roomY + roomHeight * 0.45f;
         for (int i = 0; i < objectCount; i++) {
             ObjectDefinition object = objects.get(i);
-            if (sprites.textureFor(object.id()) != null) {
+            if (sprites.textureFor(object, state) != null) {
                 continue;
             }
             shapes.setColor(lit(object, state) ? LIT_COLOR : OBJECT_COLORS[i % OBJECT_COLORS.length]);
             shapes.rect(shapeX(roomX, slotWidth, i, shapeSize), shapeY, shapeSize, shapeSize);
         }
 
-        shapes.setColor(MARKER_COLOR);
-        shapes.circle(roomX + 40f, roomY + 36f, 12f);
+        if (player == null) {
+            shapes.setColor(MARKER_COLOR);
+            shapes.circle(markerX, markerY, 12f);
+        }
         shapes.end();
 
         font.setColor(WHITE);
         batch.begin();
         batch.setColor(WHITE);
         for (int i = 0; i < objectCount; i++) {
-            Texture texture = sprites.textureFor(objects.get(i).id());
+            Texture texture = sprites.textureFor(objects.get(i), state);
             if (texture == null) {
                 continue;
             }
             drawSprite(batch, texture, shapeX(roomX, slotWidth, i, shapeSize), shapeY, shapeSize);
+        }
+        if (player != null) {
+            drawSprite(batch, player, markerX - markerSize / 2f, markerY - 8f, markerSize);
+        }
+        if (spirit != null) {
+            drawSprite(batch, spirit, markerX + markerSize * 0.55f, markerY + 12f, 40f);
         }
         String title = room.displayName();
         layout.setText(font, title);
@@ -107,6 +121,13 @@ public class RoomRenderer {
     public void dispose() {
         sprites.dispose();
         backgrounds.dispose();
+    }
+
+    private Texture summonedSpirit(GameState state) {
+        if (state == null || !state.spiritSummoned("seeker")) {
+            return null;
+        }
+        return sprites.textureFor("seeker");
     }
 
     private static float shapeX(float roomX, float slotWidth, int index, float shapeSize) {
