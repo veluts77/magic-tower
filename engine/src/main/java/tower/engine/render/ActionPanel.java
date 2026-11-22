@@ -68,15 +68,22 @@ public class ActionPanel {
                 baseline -= layout.height + GAP;
             }
         }
-        int count = lines == null ? 0 : lines.size();
-        for (int i = 0; i < count; i++) {
-            if (baseline < minBaseline) {
-                break;
-            }
-            font.draw(batch, (i + 1) + ": " + lines.get(i), LEFT, baseline);
-            baseline -= line;
+        if (lines != null && !lines.isEmpty() && baseline >= minBaseline) {
+            layout.setText(font, joinActions(lines), WHITE, width, left, true);
+            font.draw(batch, layout, LEFT, baseline);
         }
         batch.end();
+    }
+
+    private static String joinActions(List<String> lines) {
+        var text = new StringBuilder();
+        for (int i = 0; i < lines.size(); i++) {
+            if (i > 0) {
+                text.append("    ");
+            }
+            text.append(i + 1).append(": ").append(lines.get(i));
+        }
+        return text.toString();
     }
 
     private static float lineHeight(BitmapFont font) {
