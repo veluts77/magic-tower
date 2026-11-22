@@ -21,6 +21,16 @@ import static com.badlogic.gdx.Input.Keys.ESCAPE;
 
 public class TowerGame extends Game {
 
+    private final String debugRoomId;
+
+    public TowerGame() {
+        this(null);
+    }
+
+    public TowerGame(String debugRoomId) {
+        this.debugRoomId = debugRoomId;
+    }
+
     @Override
     public void create() {
         var loader = new JsonDataLoader();
@@ -48,7 +58,51 @@ public class TowerGame extends Game {
         for (String markId : floor.grantedAtStart()) {
             state.floorState().addMark(markId);
         }
+        applyDebugStartRoom(state, floors, roomsByFloor);
         setScreen(new GameScreen(state, floors, roomsByFloor, spells, spirits, artifacts, creatures));
+    }
+
+    private void applyDebugStartRoom(
+            GameState state,
+            Map<String, FloorDefinition> floors,
+            Map<String, List<RoomDefinition>> roomsByFloor) {
+        if (debugRoomId == null || debugRoomId.isBlank()) {
+            return;
+        }
+        String floorId = findFloorId(roomsByFloor, debugRoomId);
+        if (floorId == null) {
+            Gdx.app.log(
+                    "TowerGame",
+                    "WARNING: room not found: " + debugRoomId + "; starting in the default room");
+            return;
+        }
+        if (!floorId.equals(state.currentFloorId())) {
+            FloorDefinition targetFloor = floors.get(floorId);
+            if (targetFloor == null) {
+                Gdx.app.log(
+                        "TowerGame",
+                        "WARNING: room not found: " + debugRoomId + "; starting in the default room");
+                return;
+            }
+            state.enterFloor(targetFloor);
+        }
+        state.enterRoom(debugRoomId);
+        Gdx.app.log("TowerGame", "Debug start room: " + debugRoomId);
+    }
+
+    private static String findFloorId(Map<String, List<RoomDefinition>> roomsByFloor, String roomId) {
+        for (var entry : roomsByFloor.entrySet()) {
+            List<RoomDefinition> rooms = entry.getValue();
+            if (rooms == null) {
+                continue;
+            }
+            for (RoomDefinition room : rooms) {
+                if (room != null && room.sameId(roomId)) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
     }
 
     private static void loadFloors(

@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: after TASK-017 object positioning.
+Last updated: after TASK-018 debug start room.
 
 ## Completed
 
@@ -21,6 +21,7 @@ Last updated: after TASK-017 object positioning.
 - TASK-015-single-sprite-integration-lantern.md
 - TASK-016-ui-layout-fix.md
 - TASK-017-object-positioning.md
+- TASK-018-debug-start-room.md
 
 ## In Progress
 
@@ -36,10 +37,7 @@ None.
 
 ## Notes
 
-Объекты позиционируются по явным относительным координатам (role, position, size, z, wall, sprite, transition). Автоматическая раскладка убрана. Надписи к объектам убраны. Декоративные объекты рисуются, но не участвуют в выборе. Отрисовка учитывает z-порядок. Нижняя панель без изменений (120 px).
+Отладочный запуск в произвольной комнате: `./gradlew desktop:run --args="--room=<room_id>"`. Без аргумента или при неизвестной комнате — стандартный старт (с предупреждением в лог для некорректного id). Состояние игрока при debug-старте остаётся начальным.
 
-MVP Floor готов. Игра проходится от прихожей «Пыльного архива» до подъёма на следующий этаж.
-На этаже 5 комнат, 3 заклинания, 1 дух, 1 артефакт, 1 существо и 8 печатей. Для подъёма нужно 7.
-Текст рисуется шрифтом PT Sans.
-Ключ скрытой кельи — флаг `gatekeeper_key_found`. Комнатные спрайты и фоны подключены.
-UI-иконки, effects, walk sheet пока не в рендере.
+Объекты позиционируются по явным относительным координатам. Автораскладка и надписи убраны. Нижняя панель 120 px.
+MVP Floor готов. UI-иконки, effects, walk sheet пока не в рендере.
