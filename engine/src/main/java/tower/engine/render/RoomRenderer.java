@@ -15,8 +15,14 @@ import java.util.List;
 import static com.badlogic.gdx.graphics.Color.WHITE;
 import static com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType.Filled;
 import static tower.domain.state.RoomState.LIT;
+import static tower.engine.render.ActionPanel.HEIGHT;
 
 public class RoomRenderer {
+
+    private static final float DESIGN_WIDTH = 1280f;
+    private static final float DESIGN_HEIGHT = 720f - HEIGHT;
+    private static final float OBJECT_SIZE = 64f;
+    private static final float MARKER_SIZE = 56f;
 
     private static final Color ROOM_COLOR = new Color(0.16f, 0.20f, 0.30f, 1f);
     private static final Color MARKER_COLOR = new Color(0.93f, 0.78f, 0.22f, 1f);
@@ -32,29 +38,29 @@ public class RoomRenderer {
     private final RoomBackgrounds backgrounds = new RoomBackgrounds();
 
     public void draw(RoomDefinition room, ShapeRenderer shapes, SpriteBatch batch, BitmapFont font,
-                     float screenWidth, float screenHeight, float bottomInset, boolean numberObjects,
-                     GameState state) {
-        float roomX = 48f;
-        float roomY = 56f + bottomInset;
-        float roomWidth = screenWidth - 96f;
-        float roomHeight = screenHeight - 128f - bottomInset;
+                     float screenWidth, float screenHeight, boolean numberObjects, GameState state) {
+        float roomX = 0f;
+        float roomY = HEIGHT;
+        float roomWidth = screenWidth;
+        float roomHeight = screenHeight - HEIGHT;
+        float scale = Math.min(roomWidth / DESIGN_WIDTH, roomHeight / DESIGN_HEIGHT);
+        float shapeSize = OBJECT_SIZE * scale;
+        float markerSize = MARKER_SIZE * scale;
 
         Texture background = backgrounds.textureFor(room == null ? null : room.id());
         if (background != null) {
             batch.begin();
             batch.setColor(WHITE);
-            batch.draw(background, roomX, roomY, roomWidth, roomHeight);
+            drawBackground(batch, background, roomX, roomY, roomWidth, roomHeight);
             batch.end();
         }
 
         List<ObjectDefinition> objects = visibleObjects(room, state);
         int objectCount = objects.size();
-        float shapeSize = 56f;
         float slotWidth = objectCount == 0 ? 0f : roomWidth / objectCount;
         float shapeY = roomY + roomHeight * 0.45f;
-        float markerX = roomX + 40f;
-        float markerY = roomY + 36f;
-        float markerSize = 48f;
+        float markerX = roomX + 48f * scale;
+        float markerY = roomY + 40f * scale;
         Texture player = sprites.textureFor("player");
         Texture spirit = summonedSpirit(state);
 
@@ -75,7 +81,7 @@ public class RoomRenderer {
 
         if (player == null) {
             shapes.setColor(MARKER_COLOR);
-            shapes.circle(markerX, markerY, 12f);
+            shapes.circle(markerX, markerY, 12f * scale);
         }
         shapes.end();
 
@@ -90,10 +96,10 @@ public class RoomRenderer {
             drawSprite(batch, texture, shapeX(roomX, slotWidth, i, shapeSize), shapeY, shapeSize);
         }
         if (player != null) {
-            drawSprite(batch, player, markerX - markerSize / 2f, markerY - 8f, markerSize);
+            drawSprite(batch, player, markerX - markerSize / 2f, markerY - 8f * scale, markerSize);
         }
         if (spirit != null) {
-            drawSprite(batch, spirit, markerX + markerSize * 0.55f, markerY + 12f, 40f);
+            drawSprite(batch, spirit, markerX + markerSize * 0.55f, markerY + 12f * scale, 40f * scale);
         }
         String title = room.displayName();
         layout.setText(font, title);
@@ -112,9 +118,6 @@ public class RoomRenderer {
             float labelX = roomX + slotWidth * i + (slotWidth - layout.width) / 2f;
             font.draw(batch, layout, labelX, shapeY + shapeSize + font.getLineHeight() + 6f);
         }
-
-        font.draw(batch, "room: " + room.id(), 12f, 36f);
-        font.draw(batch, "objects: " + objectCount, 12f, 16f);
         batch.end();
     }
 
@@ -132,6 +135,20 @@ public class RoomRenderer {
 
     private static float shapeX(float roomX, float slotWidth, int index, float shapeSize) {
         return roomX + slotWidth * index + (slotWidth - shapeSize) / 2f;
+    }
+
+    private static void drawBackground(
+            SpriteBatch batch, Texture texture, float x, float y, float width, float height) {
+        float srcW = texture.getWidth();
+        float srcH = texture.getHeight();
+        if (srcW <= 0f || srcH <= 0f || width <= 0f || height <= 0f) {
+            return;
+        }
+        float scale = width / srcW;
+        float visibleSrcH = Math.min(srcH, height / scale);
+        int srcHeight = Math.max(1, Math.round(visibleSrcH));
+        int srcY = Math.max(0, Math.round(srcH - srcHeight));
+        batch.draw(texture, x, y, width, height, 0, srcY, Math.round(srcW), srcHeight, false, false);
     }
 
     private static void drawSprite(SpriteBatch batch, Texture texture, float boxX, float boxY, float boxSize) {

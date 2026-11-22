@@ -109,19 +109,18 @@ public class GameScreen implements Screen {
         shapes.setProjectionMatrix(camera.combined);
         batch.setProjectionMatrix(camera.combined);
 
-        float width = camera.viewportWidth - 96f;
-        float inset = actionPanel.reservedHeight(progress, heading, lines, message, font, width);
+        float width = camera.viewportWidth;
         roomRenderer.draw(
                 room,
                 shapes,
                 batch,
                 font,
-                camera.viewportWidth,
+                width,
                 camera.viewportHeight,
-                inset,
                 mode == Mode.SELECT_OBJECT,
                 state);
-        actionPanel.draw(progress, heading, lines, message, batch, font, width, inset);
+        actionPanel.drawChrome(shapes, width);
+        actionPanel.draw(progress, heading, lines, message, batch, font, width);
     }
 
     @Override

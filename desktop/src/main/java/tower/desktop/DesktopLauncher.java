@@ -10,7 +10,7 @@ public class DesktopLauncher {
         var config = new Lwjgl3ApplicationConfiguration();
 
         config.setTitle("Tower Game");
-        config.setWindowedMode(960, 540);
+        config.setWindowedMode(1280, 720);
         config.setResizable(false);
         config.useVsync(true);
         config.setForegroundFPS(60);
