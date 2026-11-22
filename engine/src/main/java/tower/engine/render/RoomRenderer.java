@@ -10,6 +10,8 @@ import tower.domain.data.ObjectDefinition;
 import tower.domain.data.RoomDefinition;
 import tower.domain.state.GameState;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.badlogic.gdx.graphics.Color.WHITE;
@@ -21,7 +23,6 @@ public class RoomRenderer {
 
     private static final float DESIGN_WIDTH = 1280f;
     private static final float DESIGN_HEIGHT = 720f - HEIGHT;
-    private static final float OBJECT_SIZE = 64f;
     private static final float MARKER_SIZE = 56f;
 
     private static final Color ROOM_COLOR = new Color(0.16f, 0.20f, 0.30f, 1f);
@@ -38,14 +39,15 @@ public class RoomRenderer {
     private final RoomBackgrounds backgrounds = new RoomBackgrounds();
 
     public void draw(RoomDefinition room, ShapeRenderer shapes, SpriteBatch batch, BitmapFont font,
-                     float screenWidth, float screenHeight, boolean numberObjects, GameState state) {
+                     float screenWidth, float screenHeight, GameState state) {
         float roomX = 0f;
         float roomY = HEIGHT;
         float roomWidth = screenWidth;
         float roomHeight = screenHeight - HEIGHT;
         float scale = Math.min(roomWidth / DESIGN_WIDTH, roomHeight / DESIGN_HEIGHT);
-        float shapeSize = OBJECT_SIZE * scale;
         float markerSize = MARKER_SIZE * scale;
+        float markerX = roomX + 48f * scale;
+        float markerY = roomY + 40f * scale;
 
         Texture background = backgrounds.textureFor(room == null ? null : room.id());
         if (background != null) {
@@ -55,12 +57,7 @@ public class RoomRenderer {
             batch.end();
         }
 
-        List<ObjectDefinition> objects = visibleObjects(room, state);
-        int objectCount = objects.size();
-        float slotWidth = objectCount == 0 ? 0f : roomWidth / objectCount;
-        float shapeY = roomY + roomHeight * 0.45f;
-        float markerX = roomX + 48f * scale;
-        float markerY = roomY + 40f * scale;
+        List<ObjectDefinition> objects = sortedVisible(room, state);
         Texture player = sprites.textureFor("player");
         Texture spirit = summonedSpirit(state);
 
@@ -69,16 +66,15 @@ public class RoomRenderer {
             shapes.setColor(ROOM_COLOR);
             shapes.rect(roomX, roomY, roomWidth, roomHeight);
         }
-
-        for (int i = 0; i < objectCount; i++) {
+        for (int i = 0; i < objects.size(); i++) {
             ObjectDefinition object = objects.get(i);
             if (sprites.textureFor(object, state) != null) {
                 continue;
             }
+            float[] box = pixelBox(object, roomX, roomY, roomWidth, roomHeight);
             shapes.setColor(lit(object, state) ? LIT_COLOR : OBJECT_COLORS[i % OBJECT_COLORS.length]);
-            shapes.rect(shapeX(roomX, slotWidth, i, shapeSize), shapeY, shapeSize, shapeSize);
+            shapes.rect(box[0], box[1], box[2], box[3]);
         }
-
         if (player == null) {
             shapes.setColor(MARKER_COLOR);
             shapes.circle(markerX, markerY, 12f * scale);
@@ -88,36 +84,24 @@ public class RoomRenderer {
         font.setColor(WHITE);
         batch.begin();
         batch.setColor(WHITE);
-        for (int i = 0; i < objectCount; i++) {
-            Texture texture = sprites.textureFor(objects.get(i), state);
+        for (ObjectDefinition object : objects) {
+            Texture texture = sprites.textureFor(object, state);
             if (texture == null) {
                 continue;
             }
-            drawSprite(batch, texture, shapeX(roomX, slotWidth, i, shapeSize), shapeY, shapeSize);
+            float[] box = pixelBox(object, roomX, roomY, roomWidth, roomHeight);
+            drawSprite(batch, texture, box[0], box[1], box[2], box[3]);
         }
         if (player != null) {
-            drawSprite(batch, player, markerX - markerSize / 2f, markerY - 8f * scale, markerSize);
+            drawSprite(batch, player, markerX - markerSize / 2f, markerY - 8f * scale, markerSize, markerSize);
         }
         if (spirit != null) {
-            drawSprite(batch, spirit, markerX + markerSize * 0.55f, markerY + 12f * scale, 40f * scale);
+            float spiritSize = 40f * scale;
+            drawSprite(batch, spirit, markerX + markerSize * 0.55f, markerY + 12f * scale, spiritSize, spiritSize);
         }
         String title = room.displayName();
         layout.setText(font, title);
         font.draw(batch, layout, (screenWidth - layout.width) / 2f, screenHeight - 8f - font.getLineHeight());
-
-        for (int i = 0; i < objectCount; i++) {
-            ObjectDefinition object = objects.get(i);
-            String label = object.displayName();
-            if (lit(object, state)) {
-                label = label + " (lit)";
-            }
-            if (numberObjects) {
-                label = (i + 1) + ": " + label;
-            }
-            layout.setText(font, label);
-            float labelX = roomX + slotWidth * i + (slotWidth - layout.width) / 2f;
-            font.draw(batch, layout, labelX, shapeY + shapeSize + font.getLineHeight() + 6f);
-        }
         batch.end();
     }
 
@@ -133,8 +117,20 @@ public class RoomRenderer {
         return sprites.textureFor("seeker");
     }
 
-    private static float shapeX(float roomX, float slotWidth, int index, float shapeSize) {
-        return roomX + slotWidth * index + (slotWidth - shapeSize) / 2f;
+    private static List<ObjectDefinition> sortedVisible(RoomDefinition room, GameState state) {
+        List<ObjectDefinition> objects = visibleObjects(room, state);
+        var sorted = new ArrayList<>(objects);
+        sorted.sort(Comparator.comparingInt(ObjectDefinition::z));
+        return sorted;
+    }
+
+    private static float[] pixelBox(
+            ObjectDefinition object, float roomX, float roomY, float roomWidth, float roomHeight) {
+        float width = object.width() * roomWidth;
+        float height = object.height() * roomHeight;
+        float centerX = roomX + object.posX() * roomWidth;
+        float centerY = roomY + roomHeight - object.posY() * roomHeight;
+        return new float[] {centerX - width / 2f, centerY - height / 2f, width, height};
     }
 
     private static void drawBackground(
@@ -151,19 +147,20 @@ public class RoomRenderer {
         batch.draw(texture, x, y, width, height, 0, srcY, Math.round(srcW), srcHeight, false, false);
     }
 
-    private static void drawSprite(SpriteBatch batch, Texture texture, float boxX, float boxY, float boxSize) {
+    private static void drawSprite(
+            SpriteBatch batch, Texture texture, float boxX, float boxY, float boxWidth, float boxHeight) {
         float width = texture.getWidth();
         float height = texture.getHeight();
-        if (width <= 0f || height <= 0f) {
+        if (width <= 0f || height <= 0f || boxWidth <= 0f || boxHeight <= 0f) {
             return;
         }
-        float scale = Math.min(boxSize / width, boxSize / height);
+        float scale = Math.min(boxWidth / width, boxHeight / height);
         float drawWidth = width * scale;
         float drawHeight = height * scale;
         batch.draw(
                 texture,
-                boxX + (boxSize - drawWidth) / 2f,
-                boxY + (boxSize - drawHeight) / 2f,
+                boxX + (boxWidth - drawWidth) / 2f,
+                boxY + (boxHeight - drawHeight) / 2f,
                 drawWidth,
                 drawHeight);
     }

@@ -110,15 +110,7 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
 
         float width = camera.viewportWidth;
-        roomRenderer.draw(
-                room,
-                shapes,
-                batch,
-                font,
-                width,
-                camera.viewportHeight,
-                mode == Mode.SELECT_OBJECT,
-                state);
+        roomRenderer.draw(room, shapes, batch, font, width, camera.viewportHeight, state);
         actionPanel.drawChrome(shapes, width);
         actionPanel.draw(progress, heading, lines, message, batch, font, width);
     }
@@ -182,7 +174,7 @@ public class GameScreen implements Screen {
     }
 
     private void chooseObject() {
-        List<ObjectDefinition> objects = visibleObjects();
+        List<ObjectDefinition> objects = selectableObjects();
         int index = selectedIndex(objects.size());
         if (index == NONE) {
             return;
@@ -224,7 +216,7 @@ public class GameScreen implements Screen {
     private List<String> lines() {
         return switch (mode) {
             case ROOM -> labels(resolver.availableActions(state, rooms(), spirits, floor()));
-            case SELECT_OBJECT -> objectLabels(visibleObjects());
+            case SELECT_OBJECT -> objectLabels(selectableObjects());
             case OBJECT_ACTIONS -> labels(objectActions());
         };
     }
@@ -243,7 +235,7 @@ public class GameScreen implements Screen {
 
     private String selectedName() {
         String selectedId = state.selectedObjectId();
-        for (ObjectDefinition object : visibleObjects()) {
+        for (ObjectDefinition object : selectableObjects()) {
             if (object.id().equals(selectedId)) {
                 return objectName(object);
             }
@@ -281,8 +273,21 @@ public class GameScreen implements Screen {
         return name;
     }
 
-    private List<ObjectDefinition> visibleObjects() {
-        return state.visibleObjects(currentRoom());
+    private List<ObjectDefinition> selectableObjects() {
+        var selectable = new ArrayList<ObjectDefinition>();
+        for (ObjectDefinition object : state.visibleObjects(currentRoom())) {
+            if (object.isInteractive()) {
+                selectable.add(object);
+            }
+        }
+        selectable.sort((left, right) -> {
+            int byY = Float.compare(left.posY(), right.posY());
+            if (byY != 0) {
+                return byY;
+            }
+            return Float.compare(left.posX(), right.posX());
+        });
+        return selectable;
     }
 
     private String progress() {

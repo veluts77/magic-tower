@@ -5,10 +5,22 @@ import java.util.List;
 
 public class ObjectDefinition {
 
+    public static final String ROLE_INTERACTIVE = "interactive";
+    public static final String ROLE_DECORATIVE = "decorative";
+
     private String id;
     private String displayName;
     private String type;
     private String description;
+    private String role = ROLE_INTERACTIVE;
+    private String sprite;
+    private float posX;
+    private float posY;
+    private float width = 0.1f;
+    private float height = 0.1f;
+    private int z;
+    private String wall;
+    private String transition;
     private String artifactId;
     private String creatureId;
     private String blockedByCreatureId;
@@ -43,6 +55,87 @@ public class ObjectDefinition {
 
     public String type() {
         return type;
+    }
+
+    public String role() {
+        return role == null || role.isBlank() ? ROLE_INTERACTIVE : role;
+    }
+
+    public void setRole(String role) {
+        if (role == null || role.isBlank()) {
+            this.role = ROLE_INTERACTIVE;
+            return;
+        }
+        this.role = role;
+    }
+
+    public boolean isInteractive() {
+        return !ROLE_DECORATIVE.equalsIgnoreCase(role());
+    }
+
+    public boolean isDecorative() {
+        return ROLE_DECORATIVE.equalsIgnoreCase(role());
+    }
+
+    public String sprite() {
+        if (sprite == null || sprite.isBlank()) {
+            return id;
+        }
+        return sprite;
+    }
+
+    public void setSprite(String sprite) {
+        this.sprite = blankToNull(sprite);
+    }
+
+    public float posX() {
+        return posX;
+    }
+
+    public float posY() {
+        return posY;
+    }
+
+    public void setPosition(float x, float y) {
+        this.posX = x;
+        this.posY = y;
+    }
+
+    public float width() {
+        return width;
+    }
+
+    public float height() {
+        return height;
+    }
+
+    public void setSize(float width, float height) {
+        this.width = width;
+        this.height = height;
+    }
+
+    public int z() {
+        return z;
+    }
+
+    public void setZ(int z) {
+        this.z = z;
+    }
+
+    public String wall() {
+        return wall;
+    }
+
+    public void setWall(String wall) {
+        this.wall = blankToNull(wall);
+    }
+
+    public String transition() {
+        return transition;
+    }
+
+    public void setTransition(String transition) {
+        this.transition = blankToNull(transition);
     }
 
     public List<String> supportedSpells() {

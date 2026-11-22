@@ -254,6 +254,17 @@ public class JsonDataLoader implements DataLoader {
                     text(objectJson, "displayName"),
                     text(objectJson, "type"),
                     text(objectJson, "description"));
+            object.setRole(text(objectJson, "role"));
+            object.setSprite(text(objectJson, "sprite"));
+            object.setPosition(
+                    number(objectJson.get("position"), "x", 0f),
+                    number(objectJson.get("position"), "y", 0f));
+            object.setSize(
+                    number(objectJson.get("size"), "width", 0.1f),
+                    number(objectJson.get("size"), "height", 0.1f));
+            object.setZ(objectJson.getInt("z", 0));
+            object.setWall(text(objectJson, "wall"));
+            object.setTransition(text(objectJson, "transition"));
             object.setSupportedSpells(readIds(objectJson.get("supportedSpells")));
             object.setArtifactId(text(objectJson, "artifact"));
             object.setCreatureId(text(objectJson, "creature"));
@@ -390,5 +401,16 @@ public class JsonDataLoader implements DataLoader {
         }
         String value = node.getString(name, "");
         return value == null ? "" : value;
+    }
+
+    private static float number(JsonValue node, String name, float fallback) {
+        if (node == null) {
+            return fallback;
+        }
+        JsonValue value = node.get(name);
+        if (value == null || !value.isNumber()) {
+            return fallback;
+        }
+        return value.asFloat();
     }
 }

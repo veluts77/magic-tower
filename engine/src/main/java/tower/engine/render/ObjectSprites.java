@@ -20,13 +20,17 @@ public class ObjectSprites {
     private static final Logger LOG = Logger.getLogger(ObjectSprites.class.getName());
 
     private static final Map<String, String> PATHS = Map.ofEntries(
-            entry("lantern", "images/lantern.png"),
+            entry("lantern", "images/objects/obj_magic_lantern.png"),
             entry("lantern:lit", "images/objects/obj_magic_lantern_lit.png"),
             entry("old_chest", "images/objects/obj_old_chest_closed.png"),
             entry("old_chest:open", "images/objects/obj_old_chest_open.png"),
             entry("broken_chandelier", "images/objects/obj_broken_chandelier.png"),
+            entry("dusty_floor", "images/objects/obj_dusty_floor.png"),
             entry("closed_door", "images/objects/obj_door_closed.png"),
+            entry("closed_door_left", "images/objects/obj_door_left.png"),
+            entry("closed_door_right", "images/objects/obj_door_right.png"),
             entry("ancient_altar", "images/objects/obj_stone_altar.png"),
+            entry("stairs_up", "images/objects/obj_stairs_up.png"),
             entry("map_table", "images/objects/obj_map_table.png"),
             entry("ancient_folio", "images/objects/obj_ancient_folio.png"),
             entry("ancient_rune", "images/objects/obj_hidden_rune.png"),
@@ -81,7 +85,7 @@ public class ObjectSprites {
         if ("ash_slug".equals(objectId) && slugNeutralized(object, state)) {
             return "ash_slug:neutralized";
         }
-        return objectId;
+        return object.sprite();
     }
 
     private static boolean chestOpen(ObjectDefinition object, GameState state) {
